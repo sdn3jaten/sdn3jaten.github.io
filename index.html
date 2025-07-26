@@ -9,10 +9,11 @@
     <style>
         html{
             max-width: 481px;
-    margin: auto;
-    display: block;
-    background: #fff;
-    width: 100%;}
+            margin: auto;
+            display: block;
+            background: #fff;
+            width: 100%;
+        }
         body {
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #0f172a, #1e293b);
@@ -186,6 +187,7 @@
             ['rgb(186, 210, 255)', 'rgb(186, 186, 255)'],
             ['rgb(255, 186, 240)', 'rgb(255, 186, 225)'],
         ];
+        // Columns A to O means first 15 columns (0 to 14 index)
         function parseIndoNumber(str) {
             if (!str) return 0;
             let cleaned = str.replace(/\./g, '').replace(/,/g, '.').trim();
@@ -212,6 +214,8 @@
         function parseCSV(csvText) {
             const lines = csvText.trim().split('\n');
             const headers = lines[0].split(',').map(h => h.trim());
+            // Limit headers to first 15 columns (A to O)
+            const limitedHeaders = headers.slice(0, 15);
             const result = [];
             for (let i = 1; i < lines.length; i++) {
                 if (lines[i].trim() === '') continue;
@@ -234,12 +238,12 @@
                 }
                 values.push(current.trim());
                 const row = {};
-                headers.forEach((header, idx) => {
+                limitedHeaders.forEach((header, idx) => {
                     row[header] = values[idx] || '';
                 });
                 result.push(row);
             }
-            return { headers, data: result };
+            return { headers: limitedHeaders, data: result };
         }
         function displayData(parsedData, filterName = '') {
             const { headers, data } = parsedData;
@@ -249,12 +253,27 @@
             }
             const groupKey = headers[0];
             const grouped = {};
-            data.forEach(row => {
+            // Extract last row (row 26) - last element in data array
+            const lastRow = data[data.length - 1];
+            // Group all rows except last row
+            data.slice(0, data.length - 1).forEach(row => {
                 const key = row[groupKey] || 'Tidak Diketahui';
                 if (!grouped[key]) grouped[key] = [];
                 grouped[key].push(row);
             });
-            const filteredEntries = Object.entries(grouped).filter(([name]) => {
+            // Add last row to a special group key to display first
+            const lastRowKey = lastRow[groupKey] || 'Tidak Diketahui';
+            // Create a new grouped object with lastRowKey first
+            const newGrouped = {};
+            newGrouped[lastRowKey] = [lastRow];
+            // Add the rest groups except lastRowKey (to avoid duplication)
+            Object.entries(grouped).forEach(([key, items]) => {
+                if (key !== lastRowKey) {
+                    newGrouped[key] = items;
+                }
+            });
+            // Filter groups by filterName
+            const filteredEntries = Object.entries(newGrouped).filter(([name]) => {
                 return name.toLowerCase().includes(filterName.toLowerCase());
             });
             if (filteredEntries.length === 0) {
@@ -278,6 +297,10 @@
                     html += `<section class="border border-gray-300 rounded p-3 bg-white text-black">`;
                     headers.forEach(header => {
                         if (header === groupKey) return;
+                        // For first box "pemasukan" skip "Kurang" field
+                        if (index === 0 && name.toLowerCase() === 'pemasukan' && header.toLowerCase() === 'kurang') {
+                            return;
+                        }
                         if (header.toLowerCase() === 'total') {
                             const totalValue = item[header] || '-';
                             html += `
