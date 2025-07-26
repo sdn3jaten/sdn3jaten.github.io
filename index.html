@@ -1,0 +1,347 @@
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>KAS A5 - Nota Style</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            min-height: 100vh;
+            color: #e0e7ff;
+            max-width: 480px;
+            margin:auto;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .nota-box {
+            border: 1px solid #374151;
+            box-shadow: 0 2px 6px rgb(0 0 0 / 0.3);
+            border-radius: 0.5rem;
+            color: #1f2937;
+            backdrop-filter: saturate(180%) blur(10px);
+            background-color: rgba(31 41 55 / 0.85);
+        }
+        .total-section {
+            border-top: 2px solid #94a3b8;
+            font-weight: 700;
+            margin-top: 0.75rem;
+            padding-top: 0.5rem;
+            color: #1f2937;
+        }
+        .kurang-red {
+            color: #dc2626;
+            font-weight: 600;
+        }
+        .lunas-green {
+            color: #16a34a;
+            font-weight: 700;
+        }
+        header.fixed-header {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(90deg, #0f766e, #000000);
+            border-bottom: none;
+            z-index: 50;
+            box-shadow: 0 4px 12px rgb(15 118 110 / 0.7);
+            backdrop-filter: saturate(180%) blur(12px);
+            max-width: 480px;
+            width: 100%;
+        }
+        main.content-wrapper {
+            padding-top: 8rem;
+            max-width: 480px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .search-input {
+            width: 100%;
+            padding: 0.5rem 1rem 0.5rem 3rem;
+            border-radius: 9999px;
+            border: 2px solid transparent;
+            background-color: #334155;
+            color: #e0e7ff;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgb(0 0 0 / 0.4);
+        }
+        .search-input::placeholder {
+            color: #94a3b8;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: #0f766e;
+            background-color: #1e293b;
+            box-shadow: 0 0 8px 2px rgb(15 118 110 / 0.7);
+            color: #d1d5db;
+        }
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #4ade80;
+            font-size: 1.1rem;
+            pointer-events: none;
+        }
+        .header-title {
+            font-weight: 900;
+            font-size: 1.5rem;
+            background: linear-gradient(90deg, #34d399, #059669);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.05em;
+            user-select: none;
+            text-align: center;
+            width: 100%;
+            line-height: 1.1;
+        }
+        .nota-box > header {
+            border-bottom: none !important;
+            padding-bottom: 0 !important;
+            margin-bottom: 0 !important;
+        }
+        .nota-box > header > h2 {
+            text-align: center;
+            background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8f00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            font-size: 1.25rem;
+            user-select: none;
+        }
+        .nota-box section {
+            background-color: #ffffff;
+            color: #000000;
+            border-color: #d1d5db;
+        }
+        .total-section {
+            color: #000000;
+            border-top-color: #374151;
+        }
+        #loading, #error {
+            color: #a5b4fc;
+        }
+        /* Remove desktop styles and force mobile layout */
+        @media (min-width: 481px) {
+            /* Redirect to mobile layout by forcing width and centering */
+            body, header.fixed-header, main.content-wrapper {
+                width: 480px !important;
+                max-width: 480px !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
+                overflow-x: hidden !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="fixed-header">
+        <div class="container mx-auto px-4 py-4 flex flex-col items-center gap-4">
+            <h1 class="header-title select-none">KAS A5</h1>
+            <div class="w-full relative">
+                <label for="search-input" class="sr-only">Cari berdasarkan nama:</label>
+                <input id="search-input" type="text" placeholder="Ketik nama..." class="search-input" autocomplete="off" />
+                <i class="fas fa-search search-icon"></i>
+            </div>
+        </div>
+    </header>
+    <main class="content-wrapper container mx-auto px-4 py-8 flex-grow flex flex-col items-center">
+        <div id="loading" class="loading flex justify-center items-center py-10 text-lg space-x-2">
+            <i class="fas fa-spinner fa-spin text-green-400"></i>
+            <span>Memuat data...</span>
+        </div>
+        <div id="error" class="error hidden text-red-400 text-center py-10 text-lg font-medium"></div>
+        <div id="data-container" class="grid grid-cols-1 gap-6 w-full max-w-md"></div>
+    </main>
+    <script>
+        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTbsf5v7FW1ilCkFXAqiWbeUeTNP_LIfuw9VMHmQo2_c16cDGa-JAWpL9OhzJ088vmGgoJSBUeMSMzG/pub?output=csv';
+        let parsedDataGlobal = null;
+        const gradients = [
+            ['rgb(255, 179, 186)', 'rgb(255, 223, 186)'],
+            ['rgb(186, 255, 201)', 'rgb(186, 225, 255)'],
+            ['rgb(255, 255, 186)', 'rgb(186, 255, 255)'],
+            ['rgb(255, 210, 186)', 'rgb(255, 186, 255)'],
+            ['rgb(186, 255, 255)', 'rgb(186, 255, 225)'],
+            ['rgb(255, 186, 210)', 'rgb(255, 186, 186)'],
+            ['rgb(210, 255, 186)', 'rgb(186, 255, 210)'],
+            ['rgb(255, 240, 186)', 'rgb(255, 255, 186)'],
+            ['rgb(186, 210, 255)', 'rgb(186, 186, 255)'],
+            ['rgb(255, 186, 240)', 'rgb(255, 186, 225)'],
+        ];
+        function parseIndoNumber(str) {
+            if (!str) return 0;
+            let cleaned = str.replace(/\./g, '').replace(/,/g, '.').trim();
+            let num = parseFloat(cleaned);
+            return isNaN(num) ? 0 : num;
+        }
+        function formatIndoNumber(num) {
+            return num.toLocaleString('id-ID');
+        }
+        async function fetchSheetData() {
+            try {
+                const response = await fetch(sheetUrl);
+                if (!response.ok) {
+                    throw new Error('Gagal mengambil data');
+                }
+                const csvText = await response.text();
+                const data = parseCSV(csvText);
+                parsedDataGlobal = data;
+                displayData(data);
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+        function parseCSV(csvText) {
+            const lines = csvText.trim().split('\n');
+            const headers = lines[0].split(',').map(h => h.trim());
+            const result = [];
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim() === '') continue;
+                const firstCell = lines[i].split(',')[0].trim().toLowerCase();
+                if (firstCell === 'total') continue;
+                const values = [];
+                let current = '';
+                let inQuotes = false;
+                for (let char of lines[i]) {
+                    if (char === '"' && inQuotes) {
+                        inQuotes = false;
+                    } else if (char === '"' && !inQuotes) {
+                        inQuotes = true;
+                    } else if (char === ',' && !inQuotes) {
+                        values.push(current.trim());
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                values.push(current.trim());
+                const row = {};
+                headers.forEach((header, idx) => {
+                    row[header] = values[idx] || '';
+                });
+                result.push(row);
+            }
+            return { headers, data: result };
+        }
+        function displayData(parsedData, filterName = '') {
+            const { headers, data } = parsedData;
+            if (data.length === 0) {
+                showError('Tidak ada data yang ditemukan');
+                return;
+            }
+            const groupKey = headers[0];
+            const grouped = {};
+            data.forEach(row => {
+                const key = row[groupKey] || 'Tidak Diketahui';
+                if (!grouped[key]) grouped[key] = [];
+                grouped[key].push(row);
+            });
+            const filteredEntries = Object.entries(grouped).filter(([name]) => {
+                return name.toLowerCase().includes(filterName.toLowerCase());
+            });
+            if (filteredEntries.length === 0) {
+                document.getElementById('data-container').innerHTML = `<p class="text-center text-gray-400 col-span-full">Nama "${filterName}" tidak ditemukan.</p>`;
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('error').classList.add('hidden');
+                return;
+            }
+            let html = '';
+            filteredEntries.forEach(([name, items], index) => {
+                const gradient = gradients[index % gradients.length];
+                const bgStyle = `background: linear-gradient(135deg, ${gradient[0]}, ${gradient[1]});`;
+                html += `
+                <article class="nota-box p-6 flex flex-col shadow-md" style="${bgStyle}">
+                    <header>
+                        <h2>${name}</h2>
+                    </header>
+                    <div class="flex-grow space-y-3 mt-3">
+                `;
+                items.forEach((item) => {
+                    html += `<section class="border border-gray-300 rounded p-3 bg-white text-black">`;
+                    headers.forEach(header => {
+                        if (header === groupKey) return;
+                        if (header.toLowerCase() === 'total') {
+                            const totalValue = item[header] || '-';
+                            html += `
+                                <div class="flex justify-between text-sm total-section">
+                                    <span class="font-bold">${header}</span>
+                                    <span class="font-bold">${totalValue}</span>
+                                </div>
+                            `;
+                        } else if (header.toLowerCase() === 'kurang') {
+                            const totalRaw = item['Total'] || item['total'] || '';
+                            const totalNum = parseIndoNumber(totalRaw);
+                            const kurangRaw = item[header] || '';
+                            const kurangNum = parseIndoNumber(kurangRaw);
+                            if (totalNum === 180000) {
+                                html += `
+                                    <div class="flex justify-between text-sm">
+                                        <span class="font-medium">${header}</span>
+                                        <span class="lunas-green">LUNAS</span>
+                                    </div>
+                                `;
+                            } else {
+                                html += `
+                                    <div class="flex justify-between text-sm kurang-red">
+                                        <span class="font-medium">${header}</span>
+                                        <span>${kurangRaw || '-'}</span>
+                                    </div>
+                                `;
+                            }
+                        } else {
+                            const value = item[header] || '-';
+                            html += `
+                                <div class="flex justify-between text-sm">
+                                    <span class="font-medium">${header}</span>
+                                    <span class="text-right break-words">${value}</span>
+                                </div>
+                            `;
+                        }
+                    });
+                    html += `</section>`;
+                });
+                html += `
+                    </div>
+                </article>`;
+            });
+            const container = document.getElementById('data-container');
+            container.innerHTML = html;
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('error').classList.add('hidden');
+        }
+        function showError(message) {
+            document.getElementById('loading').classList.add('hidden');
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = `Error: ${message}`;
+            errorDiv.classList.remove('hidden');
+            document.getElementById('data-container').innerHTML = '';
+        }
+        // Redirect desktop users to mobile layout by forcing viewport width and scale
+        if (window.innerWidth > 480) {
+            document.querySelector('meta[name=viewport]').setAttribute('content', 'width=480, initial-scale=1, maximum-scale=1, user-scalable=no');
+        }
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchSheetData();
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('input', (e) => {
+                const filter = e.target.value.trim();
+                if (parsedDataGlobal) {
+                    displayData(parsedDataGlobal, filter);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
