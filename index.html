@@ -173,7 +173,8 @@
         <div id="data-container" class="grid grid-cols-1 gap-6 w-full max-w-md"></div>
     </main>
     <script>
-        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTbsf5v7FW1ilCkFXAqiWbeUeTNP_LIfuw9VMHmQo2_c16cDGa-JAWpL9OhzJ088vmGgoJSBUeMSMzG/pub?output=csv';
+        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTbsf5v7FW1ilCkFXAqiWbeUeTNP_LIfuw9VMHmQo2_c16cDGa-JAWpL9OhzJ088vmGgoJSBUeMSMzG/pub?gid=0&output=csv';
+        const sheetUrl2 = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTbsf5v7FW1ilCkFXAqiWbeUeTNP_LIfuw9VMHmQo2_c16cDGa-JAWpL9OhzJ088vmGgoJSBUeMSMzG/pub?gid=1589231160&output=csv';
         let parsedDataGlobal = null;
         const gradients = [
             ['rgb(255, 179, 186)', 'rgb(255, 223, 186)'],
@@ -199,14 +200,68 @@
         }
         async function fetchSheetData() {
             try {
-                const response = await fetch(sheetUrl);
-                if (!response.ok) {
-                    throw new Error('Gagal mengambil data');
+                const [response1, response2] = await Promise.all([fetch(sheetUrl), fetch(sheetUrl2)]);
+                if (!response1.ok) {
+                    throw new Error('Gagal mengambil data sheet pertama');
                 }
-                const csvText = await response.text();
-                const data = parseCSV(csvText);
-                parsedDataGlobal = data;
-                displayData(data);
+                if (!response2.ok) {
+                    throw new Error('Gagal mengambil data sheet kedua');
+                }
+                const csvText1 = await response1.text();
+                const csvText2 = await response2.text();
+                const data1 = parseCSV(csvText1);
+                const data2 = parseCSV(csvText2);
+
+                // Remove groups with key "Tidak Diketahui"
+                function filterUnknownGroup(data) {
+                    const filteredData = data.data.filter(row => {
+                        const key = row[data.headers[0]] || '';
+                        return key.toLowerCase() !== 'tidak diketahui';
+                    });
+                    return { headers: data.headers, data: filteredData };
+                }
+                const filteredData1 = filterUnknownGroup(data1);
+                const filteredData2 = filterUnknownGroup(data2);
+
+                // Group data by first column key
+                function groupData(data) {
+                    const groupKey = data.headers[0];
+                    const grouped = {};
+                    data.data.forEach(row => {
+                        const key = row[groupKey] || '';
+                        if (!grouped[key]) grouped[key] = [];
+                        grouped[key].push(row);
+                    });
+                    return grouped;
+                }
+                const grouped1 = groupData(filteredData1);
+                // For sheetUrl2, we will not group by first column, but treat all rows as one group "Pengeluaran"
+                const pengeluaranItems = filteredData2.data;
+
+                // Prepare final ordered groups:
+                // 1. "Pemasukan" from sheetUrl (grouped1)
+                // 2. "Pengeluaran" from sheetUrl2 (all rows)
+                // 3. Then other groups from sheetUrl (grouped1) except "Pemasukan"
+
+                const finalGroups = {};
+
+                // Add "Pemasukan" first if exists in grouped1
+                if (grouped1['Pemasukan']) {
+                    finalGroups['Pemasukan'] = grouped1['Pemasukan'];
+                }
+
+                // Add "Pengeluaran" group with special flag
+                finalGroups['Pengeluaran'] = pengeluaranItems;
+
+                // Add other groups from grouped1 except "Pemasukan"
+                Object.keys(grouped1).forEach(key => {
+                    if (key !== 'Pemasukan') {
+                        finalGroups[key] = grouped1[key];
+                    }
+                });
+
+                parsedDataGlobal = { headers: filteredData1.headers, groupedData: finalGroups, pengeluaranHeaders: filteredData2.headers };
+                displayGroupedData(parsedDataGlobal);
             } catch (error) {
                 showError(error.message);
             }
@@ -245,35 +300,11 @@
             }
             return { headers: limitedHeaders, data: result };
         }
-        function displayData(parsedData, filterName = '') {
-            const { headers, data } = parsedData;
-            if (data.length === 0) {
-                showError('Tidak ada data yang ditemukan');
-                return;
-            }
+        function displayGroupedData(parsedData, filterName = '') {
+            const { headers, groupedData, pengeluaranHeaders } = parsedData;
             const groupKey = headers[0];
-            const grouped = {};
-            // Extract last row (row 26) - last element in data array
-            const lastRow = data[data.length - 1];
-            // Group all rows except last row
-            data.slice(0, data.length - 1).forEach(row => {
-                const key = row[groupKey] || 'Tidak Diketahui';
-                if (!grouped[key]) grouped[key] = [];
-                grouped[key].push(row);
-            });
-            // Add last row to a special group key to display first
-            const lastRowKey = lastRow[groupKey] || 'Tidak Diketahui';
-            // Create a new grouped object with lastRowKey first
-            const newGrouped = {};
-            newGrouped[lastRowKey] = [lastRow];
-            // Add the rest groups except lastRowKey (to avoid duplication)
-            Object.entries(grouped).forEach(([key, items]) => {
-                if (key !== lastRowKey) {
-                    newGrouped[key] = items;
-                }
-            });
             // Filter groups by filterName
-            const filteredEntries = Object.entries(newGrouped).filter(([name]) => {
+            const filteredEntries = Object.entries(groupedData).filter(([name]) => {
                 return name.toLowerCase().includes(filterName.toLowerCase());
             });
             if (filteredEntries.length === 0) {
@@ -293,54 +324,80 @@
                     </header>
                     <div class="flex-grow space-y-3 mt-3">
                 `;
-                items.forEach((item) => {
-                    html += `<section class="border border-gray-300 rounded p-3 bg-white text-black">`;
-                    headers.forEach(header => {
-                        if (header === groupKey) return;
-                        // For first box "pemasukan" skip "Kurang" field
-                        if (index === 0 && name.toLowerCase() === 'pemasukan' && header.toLowerCase() === 'kurang') {
-                            return;
-                        }
-                        if (header.toLowerCase() === 'total') {
-                            const totalValue = item[header] || '-';
-                            html += `
-                                <div class="flex justify-between text-sm total-section">
-                                    <span class="font-bold">${header}</span>
-                                    <span class="font-bold">${totalValue}</span>
-                                </div>
-                            `;
-                        } else if (header.toLowerCase() === 'kurang') {
-                            const totalRaw = item['Total'] || item['total'] || '';
-                            const totalNum = parseIndoNumber(totalRaw);
-                            const kurangRaw = item[header] || '';
-                            const kurangNum = parseIndoNumber(kurangRaw);
-                            if (totalNum === 180000) {
-                                html += `
-                                    <div class="flex justify-between text-sm">
-                                        <span class="font-medium">${header}</span>
-                                        <span class="lunas-green">LUNAS</span>
-                                    </div>
-                                `;
-                            } else {
-                                html += `
-                                    <div class="flex justify-between text-sm kurang-red">
-                                        <span class="font-medium">${header}</span>
-                                        <span>${kurangRaw || '-'}</span>
-                                    </div>
-                                `;
-                            }
-                        } else {
-                            const value = item[header] || '-';
+                if (name === 'Pengeluaran') {
+                    // Show only columns: Tanggal, Jenis, Jumlah, Total KAS
+                    // Find actual header names matching these (case insensitive)
+                    const neededHeaders = ['Tanggal', 'Jenis', 'Jumlah', 'Total KAS'];
+                    // Map to actual headers in pengeluaranHeaders ignoring case and trimming
+                    const headerMap = {};
+                    neededHeaders.forEach(needed => {
+                        const found = pengeluaranHeaders.find(h => h.trim().toLowerCase() === needed.toLowerCase());
+                        if (found) headerMap[needed] = found;
+                    });
+                    items.forEach(item => {
+                        html += `<section class="border border-gray-300 rounded p-3 bg-white text-black">`;
+                        neededHeaders.forEach(needed => {
+                            if (!headerMap[needed]) return;
+                            const value = item[headerMap[needed]] || '-';
                             html += `
                                 <div class="flex justify-between text-sm">
-                                    <span class="font-medium">${header}</span>
+                                    <span class="font-medium">${needed}</span>
                                     <span class="text-right break-words">${value}</span>
                                 </div>
                             `;
-                        }
+                        });
+                        html += `</section>`;
                     });
-                    html += `</section>`;
-                });
+                } else {
+                    // Normal display for other groups
+                    items.forEach((item) => {
+                        html += `<section class="border border-gray-300 rounded p-3 bg-white text-black">`;
+                        headers.forEach(header => {
+                            if (header === groupKey) return;
+                            // For first box "pemasukan" skip "Kurang" field
+                            if (index === 0 && name.toLowerCase() === 'pemasukan' && header.toLowerCase() === 'kurang') {
+                                return;
+                            }
+                            if (header.toLowerCase() === 'total') {
+                                const totalValue = item[header] || '-';
+                                html += `
+                                    <div class="flex justify-between text-sm total-section">
+                                        <span class="font-bold">${header}</span>
+                                        <span class="font-bold">${totalValue}</span>
+                                    </div>
+                                `;
+                            } else if (header.toLowerCase() === 'kurang') {
+                                const totalRaw = item['Total'] || item['total'] || '';
+                                const totalNum = parseIndoNumber(totalRaw);
+                                const kurangRaw = item[header] || '';
+                                if (totalNum === 180000) {
+                                    html += `
+                                        <div class="flex justify-between text-sm">
+                                            <span class="font-medium">${header}</span>
+                                            <span class="lunas-green">LUNAS</span>
+                                        </div>
+                                    `;
+                                } else {
+                                    html += `
+                                        <div class="flex justify-between text-sm kurang-red">
+                                            <span class="font-medium">${header}</span>
+                                            <span>${kurangRaw || '-'}</span>
+                                        </div>
+                                    `;
+                                }
+                            } else {
+                                const value = item[header] || '-';
+                                html += `
+                                    <div class="flex justify-between text-sm">
+                                        <span class="font-medium">${header}</span>
+                                        <span class="text-right break-words">${value}</span>
+                                    </div>
+                                `;
+                            }
+                        });
+                        html += `</section>`;
+                    });
+                }
                 html += `
                     </div>
                 </article>`;
@@ -367,7 +424,7 @@
             searchInput.addEventListener('input', (e) => {
                 const filter = e.target.value.trim();
                 if (parsedDataGlobal) {
-                    displayData(parsedDataGlobal, filter);
+                    displayGroupedData(parsedDataGlobal, filter);
                 }
             });
         });
