@@ -151,9 +151,63 @@
                 overflow-x: hidden !important;
             }
         }
+        /* Popup notification styles */
+        #popup-notification {
+            position: fixed;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #059669;
+            color: white;
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgb(5 150 105 / 0.7);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            max-width: 90vw;
+            font-weight: 400;
+            user-select: none;
+            font-size: 0.875rem; /* smaller font */
+            line-height: 1.2;
+        }
+        #popup-notification .icon-wrapper {
+            position: absolute;
+            top: 50%;
+            left: 0.75rem;
+            transform: translateY(-50%);
+            font-size: 1.25rem;
+            color: white;
+        }
+        #popup-notification button.close-btn {
+            background: transparent;
+            border: none;
+            color: #dc2626;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-left: 1rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        #popup-notification button.close-btn:focus {
+            outline: 2px solid #dc2626;
+            outline-offset: 2px;
+        }
     </style>
 </head>
 <body>
+    <div id="popup-notification" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="icon-wrapper" aria-hidden="true">
+            <i class="fas fa-bell"></i>
+        </div>
+        Untuk pembayaran paling lambat tanggal 10
+        <button class="close-btn" aria-label="Tutup notifikasi" title="Tutup notifikasi">&times;</button>
+    </div>
     <header class="fixed-header">
         <div class="container mx-auto px-4 py-4 flex flex-col items-center gap-4">
             <h1 class="header-title select-none">LAPORAN KAS 5A</h1>
@@ -339,9 +393,12 @@
                         neededHeaders.forEach(needed => {
                             if (!headerMap[needed]) return;
                             const value = item[headerMap[needed]] || '-';
+                            let displayLabel = needed;
+                            if (needed === 'Jenis') displayLabel = 'Keperluan';
+                            if (needed === 'Jumlah') displayLabel = 'Pengeluaran';
                             html += `
                                 <div class="flex justify-between text-sm">
-                                    <span class="font-medium">${needed}</span>
+                                    <span class="font-medium">${displayLabel}</span>
                                     <span class="text-right break-words">${value}</span>
                                 </div>
                             `;
@@ -440,6 +497,11 @@
                 if (parsedDataGlobal) {
                     displayGroupedData(parsedDataGlobal, filter);
                 }
+            });
+            const popup = document.getElementById('popup-notification');
+            const closeBtn = popup.querySelector('button.close-btn');
+            closeBtn.addEventListener('click', () => {
+                popup.style.display = 'none';
             });
         });
     </script>
