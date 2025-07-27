@@ -1,90 +1,56 @@
-<!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Album Foto</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nota Pengeluaran</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f5f5;
-            padding: 20px;
+            background: linear-gradient(90deg, #0f766e, #000000);
+            min-height: 100vh;
         }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
+        .aspect-square {
+            aspect-ratio: 1 / 1;
         }
-        
-        .header h1 {
-            color: #333;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+        #modalImage {
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
         }
-        
-        .gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 15px;
+        #modalImage::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
         }
-        
-        .gallery-item {
-            position: relative;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-            aspect-ratio: 1/1;
-            background-color: #fff;
-        }
-        
-        .gallery-item:hover {
-            transform: scale(1.03);
-        }
-        
-        .gallery-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
-            font-size: 1.2rem;
-            color: #666;
-        }
-        
-        .error {
-            color: #e74c3c;
-            text-align: center;
-            padding: 40px;
-            font-size: 1.2rem;
-        }
-        
-        @media (max-width: 600px) {
-            .gallery {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-                gap: 10px;
-            }
+        #modalImage::-webkit-scrollbar-thumb {
+            background-color: rgba(255,255,255,0.3);
+            border-radius: 4px;
         }
     </style>
 </head>
-<body>
-    <div class="header">
-        <h1>Album Foto</h1>
-        <p>Menampilkan gambar dari folder secara otomatis</p>
-    </div>
-    
-    <div id="gallery" class="gallery">
-        <div class="loading">Memuat gambar...</div>
+<body class="font-sans p-6 flex flex-col min-h-screen">
+    <header class="mb-12 text-center max-w-4xl mx-auto px-4">
+        <h1 class="text-white text-5xl font-extrabold drop-shadow-lg mb-3 select-none">Nota Pengeluaran</h1>
+        <p class="text-teal-300 text-lg md:text-xl font-light tracking-wide select-none">Bukti nota pengeluaran Kas Kelas 5A</p>
+    </header>
+
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4">
+        <div id="gallery" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            <div class="loading text-center py-16 text-teal-300 text-xl font-semibold select-none">Memuat gambar...</div>
+        </div>
+    </main>
+
+    <!-- Modal -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-6 z-50 hidden">
+        <button id="modalClose" class="absolute top-6 right-6 text-white text-4xl font-thin hover:text-teal-400 transition-colors focus:outline-none" aria-label="Tutup modal">&times;</button>
+        <div class="max-w-full max-h-full max-w-[90vw] max-h-[90vh] flex flex-col items-center">
+            <img id="modalImage" src="" alt="" class="max-w-full max-h-full rounded-2xl shadow-2xl object-contain" />
+            <p id="modalTitle" class="mt-6 text-white text-2xl font-semibold text-center bg-black bg-opacity-50 px-6 py-3 rounded-xl max-w-[90vw] select-text"></p>
+        </div>
     </div>
 
     <script>
@@ -92,66 +58,124 @@
         const repoOwner = 'sdn3jaten';
         const repoName = 'sdn3jaten.github.io';
         const folderPath = 'nota';
-        
+
         // Fungsi untuk mengambil daftar file dari GitHub API
         async function fetchImages() {
             try {
                 const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${folderPath}`);
-                
+
                 if (!response.ok) {
                     throw new Error(`Gagal mengambil data: ${response.status}`);
                 }
-                
+
                 const files = await response.json();
                 displayImages(files);
             } catch (error) {
                 console.error('Error:', error);
                 document.getElementById('gallery').innerHTML = `
-                    <div class="error">
+                    <div class="error text-red-400 text-center py-16 text-xl font-semibold select-none">
                         <p>Gagal memuat gambar. Pastikan folder berisi gambar.</p>
                         <p>Detail: ${error.message}</p>
                     </div>
                 `;
             }
         }
-        
+
+        // Fungsi untuk mengubah nama file menjadi judul yang lebih rapi
+        function formatTitle(filename) {
+            let name = filename.replace(/\.[^/.]+$/, "");
+            name = name.replace(/[-_]+/g, " ");
+            name = name.replace(/\b\w/g, c => c.toUpperCase());
+            return name;
+        }
+
         // Fungsi untuk menampilkan gambar
         function displayImages(files) {
             const gallery = document.getElementById('gallery');
             gallery.innerHTML = '';
-            
-            // Filter hanya file gambar
+
             const imageFiles = files.filter(file => {
                 const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
                 return imageExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
             });
-            
+
             if (imageFiles.length === 0) {
                 gallery.innerHTML = `
-                    <div class="error">
+                    <div class="error text-red-400 text-center py-16 text-xl font-semibold select-none">
                         <p>Tidak ada gambar ditemukan di folder.</p>
                         <p>Pastikan Anda mengupload gambar dengan ekstensi: .jpg, .jpeg, .png, .gif, .webp, .bmp</p>
                     </div>
                 `;
                 return;
             }
-            
-            // Tampilkan setiap gambar
+
             imageFiles.forEach(file => {
                 const item = document.createElement('div');
-                item.className = 'gallery-item';
-                
+                item.className = 'gallery-item rounded-3xl overflow-hidden shadow-2xl hover:shadow-teal-500/70 transition-shadow duration-300 bg-white cursor-pointer flex flex-col select-none';
+
                 const img = document.createElement('img');
                 img.src = file.download_url;
-                img.alt = file.name;
+                img.alt = formatTitle(file.name);
                 img.loading = 'lazy';
-                
+                img.className = 'w-full aspect-square object-cover block rounded-t-3xl';
+
+                const title = document.createElement('p');
+                title.textContent = formatTitle(file.name);
+                title.className = 'text-center text-gray-800 font-semibold mt-3 mb-4 px-4 truncate';
+
                 item.appendChild(img);
+                item.appendChild(title);
+
+                item.addEventListener('click', () => {
+                    openModal(file.download_url, formatTitle(file.name));
+                });
+
                 gallery.appendChild(item);
             });
         }
-        
-        // Inisialisasi
+
+        // Fungsi buka modal
+        function openModal(src, title) {
+            const modal = document.getElementById('modal');
+            const modalImage = document.getElementById('modalImage');
+            const modalTitle = document.getElementById('modalTitle');
+
+            modalImage.src = src;
+            modalImage.alt = title;
+            modalTitle.textContent = title;
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Fungsi tutup modal
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            const modalImage = document.getElementById('modalImage');
+
+            modal.classList.add('hidden');
+            modalImage.src = '';
+            modalImage.alt = '';
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('modalClose').addEventListener('click', closeModal);
+
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') {
+                closeModal();
+            }
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('modal');
+                if (!modal.classList.contains('hidden')) {
+                    closeModal();
+                }
+            }
+        });
+
         window.addEventListener('DOMContentLoaded', fetchImages);
     </script>
 </body>
