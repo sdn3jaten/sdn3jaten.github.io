@@ -163,7 +163,7 @@
             border-radius: 0.5rem;
             box-shadow: 0 4px 12px rgb(5 150 105 / 0.7);
             z-index: 100;
-            display: flex;
+            display: none;
             align-items: center;
             max-width: 90vw;
             width: max-content;
@@ -218,6 +218,62 @@
             background-color: #047857;
             outline: none;
         }
+        #popup-notification-2 {
+            position: fixed;
+            bottom: 5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #2563eb;
+            color: white;
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgb(37 99 235 / 0.7);
+            z-index: 101;
+            display: none;
+            align-items: center;
+            max-width: 90vw;
+            width: max-content;
+            font-weight: 400;
+            user-select: none;
+            font-size: 0.875rem;
+            line-height: 1.2;
+        }
+        #popup-notification-2 .icon-wrapper {
+            position: absolute;
+            top: 50%;
+            left: 0.75rem;
+            transform: translateY(-50%);
+            font-size: 1.25rem;
+            color: white;
+        }
+        #popup-notification-2 button.close-btn {
+            background: transparent;
+            border: none;
+            color: #f87171;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-left: 1rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        #popup-notification-2 button.close-btn:focus {
+            outline: 2px solid #f87171;
+            outline-offset: 2px;
+        }
+        #popup-notification-2 a {
+            color: #bfdbfe;
+            text-decoration: underline;
+            font-weight: 600;
+        }
+        #popup-notification-2 a:hover, #popup-notification-2 a:focus {
+            color: #93c5fd;
+            outline: none;
+        }
     </style>
 </head>
 <body>
@@ -225,8 +281,15 @@
         <div class="icon-wrapper" aria-hidden="true">
             <i class="fas fa-bell"></i>
         </div>
-        Untuk pembayaran paling lambat tanggal 10. Pembayaran via transfer <a href="/transfer.html" style=" background: #ffe000; color: #000; border-radius: 5px; padding: 0px 7px; margin-left: 5px; "> Klik disini</a>
+        Untuk pembayaran paling lambat tanggal 10
         <button class="close-btn" aria-label="Tutup notifikasi" title="Tutup notifikasi">&times;</button>
+    </div>
+    <div id="popup-notification-2" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="icon-wrapper" aria-hidden="true">
+            <i class="fas fa-info-circle"></i>
+        </div>
+        Pembayaran visa transfer bisa <a href="/transfer.html" tabindex="0">Klik Disini</a>
+        <button class="close-btn" aria-label="Tutup notifikasi kedua" title="Tutup notifikasi kedua">&times;</button>
     </div>
     <header class="fixed-header">
         <div class="container mx-auto px-4 py-4 flex flex-col items-center gap-4">
@@ -517,11 +580,55 @@
                     displayGroupedData(parsedDataGlobal, filter);
                 }
             });
-            const popup = document.getElementById('popup-notification');
-            const closeBtn = popup.querySelector('button.close-btn');
-            closeBtn.addEventListener('click', () => {
-                popup.style.display = 'none';
+            const popup1 = document.getElementById('popup-notification');
+            const closeBtn1 = popup1.querySelector('button.close-btn');
+            const popup2 = document.getElementById('popup-notification-2');
+            const closeBtn2 = popup2.querySelector('button.close-btn');
+
+            let autoCloseTimeout1 = null;
+            let autoCloseTimeout2 = null;
+
+            function closePopup1() {
+                if (popup1.style.display !== 'none') {
+                    popup1.style.display = 'none';
+                    if (autoCloseTimeout1) {
+                        clearTimeout(autoCloseTimeout1);
+                        autoCloseTimeout1 = null;
+                    }
+                }
+            }
+            function closePopup2() {
+                if (popup2.style.display !== 'none') {
+                    popup2.style.display = 'none';
+                    if (autoCloseTimeout2) {
+                        clearTimeout(autoCloseTimeout2);
+                        autoCloseTimeout2 = null;
+                    }
+                }
+            }
+
+            closeBtn1.addEventListener('click', () => {
+                closePopup1();
             });
+            closeBtn2.addEventListener('click', () => {
+                closePopup2();
+            });
+
+            // Show popup1 after 10 seconds
+            setTimeout(() => {
+                popup1.style.display = 'flex';
+
+                // Show popup2 after 20 seconds from page load (10 seconds after popup1)
+                setTimeout(() => {
+                    popup2.style.display = 'flex';
+                }, 10000);
+
+                // Auto close both popups 30 seconds after popup1 appears
+                autoCloseTimeout1 = setTimeout(() => {
+                    closePopup1();
+                    closePopup2();
+                }, 60000);
+            }, 10000);
         });
     </script>
 </body>
