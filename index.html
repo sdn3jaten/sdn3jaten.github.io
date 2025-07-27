@@ -336,6 +336,10 @@
 
                 parsedDataGlobal = { headers: filteredData1.headers, groupedData: finalGroups, pengeluaranHeaders: filteredData2.headers, pengeluaranData: pengeluaranItems };
                 displayGroupedData(parsedDataGlobal);
+                // After display, trigger speech for Sisa KAS
+                setTimeout(() => {
+                    speakSisaKas();
+                }, 500);
             } catch (error) {
                 showError(error.message);
             }
@@ -432,7 +436,7 @@
                         const colDHeader = pengeluaranHeaders[3] || null;
                         const colDValue = colDHeader ? (lastRow[colDHeader] || '-') : '-';
                         html += `
-                            <div class="mt-4 text-right font-semibold text-black bg-white p-2 rounded border border-gray-300" style="text-align: center;">
+                            <div id="sisa-kas-display" class="mt-4 text-right font-semibold text-black bg-white p-2 rounded border border-gray-300" style="text-align: center;">
                               Sisa KAS  ${colDValue}
                             </div>
                             <a href="/nota" class="nota-button" tabindex="0" role="button">Nota Pengeluaran</a>
@@ -508,13 +512,91 @@
         if (window.innerWidth > 480) {
             document.querySelector('meta[name=viewport]').setAttribute('content', 'width=480, initial-scale=1, maximum-scale=1, user-scalable=no');
         }
+        // Function to convert nominal string like "1.200.000" to speech text "satu juta dua ratus ribu"
+        // For simplicity, we will parse number and convert to Indonesian words with thousands, millions, etc.
+        // This is a basic number to words converter for Indonesian currency
+        function numberToWords(num) {
+            const satuan = ["", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan", "sepuluh", "sebelas"];
+            function toWords(n) {
+                if (n < 12) return satuan[n];
+                else if (n < 20) return toWords(n - 10) + " belas";
+                else if (n < 100) return toWords(Math.floor(n / 10)) + " puluh " + toWords(n % 10);
+                else if (n < 200) return "seratus " + toWords(n - 100);
+                else if (n < 1000) return toWords(Math.floor(n / 100)) + " ratus " + toWords(n % 100);
+                else if (n < 2000) return "seribu " + toWords(n - 1000);
+                else if (n < 1000000) return toWords(Math.floor(n / 1000)) + " ribu " + toWords(n % 1000);
+                else if (n < 1000000000) return toWords(Math.floor(n / 1000000)) + " juta " + toWords(n % 1000000);
+                else return "nomor terlalu besar";
+            }
+            return toWords(num).replace(/\s+/g, ' ').trim();
+        }
+        function speakSisaKas() {
+            const sisaKasElement = document.getElementById('sisa-kas-display');
+            if (!sisaKasElement) return;
+            const textContent = sisaKasElement.textContent || '';
+            // Extract the nominal value after "Sisa KAS"
+            const match = textContent.match(/Sisa KAS\s*(.*)/i);
+            if (!match || !match[1]) return;
+            let nominal = match[1].trim();
+            // Remove any non-digit and non-dot/comma characters
+            nominal = nominal.replace(/[^\d\.,]/g, '');
+            // Convert nominal string to number
+            // Replace dot thousand separator with empty, comma decimal separator with dot
+            let numberStr = nominal.replace(/\./g, '').replace(/,/g, '.');
+            let numberValue = parseFloat(numberStr);
+            if (isNaN(numberValue)) return;
+            // Convert number to words in Indonesian
+            let words = numberToWords(Math.floor(numberValue));
+            if (!words) return;
+            // Compose speech text
+            const speechText = `Lapor mam, untuk sisa uang kas saat ini masih ${words} rupiah.`;
+            // Create utterance
+            const utterance = new SpeechSynthesisUtterance(speechText);
+            utterance.lang = 'id-ID';
+            // Select female Indonesian voice if available
+            const voices = window.speechSynthesis.getVoices();
+            // Try to find female voice with Indonesian language
+            let femaleIndoVoice = null;
+            for (const voice of voices) {
+                if (voice.lang.toLowerCase().startsWith('id') && voice.name.toLowerCase().includes('female')) {
+                    femaleIndoVoice = voice;
+                    break;
+                }
+            }
+            // If not found, try any Indonesian voice with female gender if possible
+            if (!femaleIndoVoice) {
+                femaleIndoVoice = voices.find(v => v.lang.toLowerCase().startsWith('id') && /female|woman|girl/i.test(v.name));
+            }
+            // If still not found, fallback to any Indonesian voice
+            if (!femaleIndoVoice) {
+                femaleIndoVoice = voices.find(v => v.lang.toLowerCase().startsWith('id'));
+            }
+            if (femaleIndoVoice) {
+                utterance.voice = femaleIndoVoice;
+            }
+            // Set speech rate and pitch for natural female voice
+            utterance.rate = 1;
+            utterance.pitch = 1.2;
+            window.speechSynthesis.speak(utterance);
+        }
         window.addEventListener('DOMContentLoaded', () => {
-            fetchSheetData();
+            // On some browsers, voices might not be loaded immediately, so wait for voiceschanged event
+            if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
+                speechSynthesis.onvoiceschanged = () => {
+                    fetchSheetData();
+                };
+            } else {
+                fetchSheetData();
+            }
             const searchInput = document.getElementById('search-input');
             searchInput.addEventListener('input', (e) => {
                 const filter = e.target.value.trim();
                 if (parsedDataGlobal) {
                     displayGroupedData(parsedDataGlobal, filter);
+                    // After filtering, also speak if sisa kas visible
+                    setTimeout(() => {
+                        speakSisaKas();
+                    }, 300);
                 }
             });
             const popup = document.getElementById('popup-notification');
