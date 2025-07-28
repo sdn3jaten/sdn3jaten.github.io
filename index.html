@@ -25,6 +25,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            padding-bottom: 4.5rem; /* space for bottom nav */
         }
         .nota-box {
             border: 1px solid #374151;
@@ -33,6 +34,38 @@
             color: #1f2937;
             backdrop-filter: saturate(180%) blur(10px);
             background-color: rgba(31 41 55 / 0.85);
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            margin-bottom: 2px;
+        }
+        .nota-box.collapsed {
+            max-height: 3.5rem; /* height to show only header */
+            cursor: pointer;
+        }
+        .nota-box.expanded {
+            max-height: 2000px; /* large enough to show content */
+            cursor: default;
+        }
+        .nota-box > header {
+            border-bottom: none !important;
+            padding-bottom: 0 !important;
+            margin-bottom: 0 !important;
+            user-select: none;
+        }
+        .nota-box > header > h2 {
+            text-align: center;
+            background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8f00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            font-size: 1.25rem;
+            user-select: none;
+            padding: 0.75rem 0;
+        }
+        .nota-box section {
+            background-color: #ffffff;
+            color: #000000;
+            border-color: #d1d5db;
         }
         .total-section {
             border-top: 2px solid #94a3b8;
@@ -114,35 +147,10 @@
             width: 100%;
             line-height: 1.1;
         }
-        .nota-box > header {
-            border-bottom: none !important;
-            padding-bottom: 0 !important;
-            margin-bottom: 0 !important;
-        }
-        .nota-box > header > h2 {
-            text-align: center;
-            background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8f00ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 900;
-            font-size: 1.25rem;
-            user-select: none;
-        }
-        .nota-box section {
-            background-color: #ffffff;
-            color: #000000;
-            border-color: #d1d5db;
-        }
-        .total-section {
-            color: #000000;
-            border-top-color: #374151;
-        }
         #loading, #error {
             color: #a5b4fc;
         }
-        /* Remove desktop styles and force mobile layout */
         @media (min-width: 481px) {
-            /* Redirect to mobile layout by forcing width and centering */
             body, header.fixed-header, main.content-wrapper {
                 width: 480px !important;
                 max-width: 480px !important;
@@ -151,10 +159,9 @@
                 overflow-x: hidden !important;
             }
         }
-        /* Popup notification styles */
         #popup-notification {
             position: fixed;
-            bottom: 1rem;
+            bottom: 4.25rem;
             left: 50%;
             transform: translateX(-50%);
             background-color: #059669;
@@ -169,7 +176,7 @@
             width: max-content;
             font-weight: 400;
             user-select: none;
-            font-size: 0.875rem; /* smaller font */
+            font-size: 0.875rem;
             line-height: 1.2;
         }
         #popup-notification .icon-wrapper {
@@ -201,7 +208,7 @@
         }
         .nota-button {
             display: block;
-            margin: 0.75rem auto 0  auto;
+            margin: 0.75rem auto 0 auto;
             padding: 0.5rem 1.5rem;
             font-weight: 600;
             color: white;
@@ -220,7 +227,7 @@
         }
         #popup-notification-2 {
             position: fixed;
-            bottom: 5rem;
+            bottom: 7.75rem;
             left: 50%;
             transform: translateX(-50%);
             background-color: #2563eb;
@@ -274,6 +281,133 @@
             color: #93c5fd;
             outline: none;
         }
+        nav.fixed-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            background: linear-gradient(90deg, #0f766e, #000000);
+            box-shadow: 0 -4px 12px rgb(15 118 110 / 0.7);
+            backdrop-filter: saturate(180%) blur(12px);
+            z-index: 60;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            height: 3.5rem;
+        }
+        nav.fixed-bottom-nav a {
+            color: #a5b4fc;
+            font-weight: 600;
+            font-size: 0.875rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            user-select: none;
+            transition: color 0.3s ease;
+        }
+        nav.fixed-bottom-nav a.active,
+        nav.fixed-bottom-nav a:hover,
+        nav.fixed-bottom-nav a:focus {
+            color: #34d399;
+            outline: none;
+        }
+        nav.fixed-bottom-nav a i {
+            font-size: 1.25rem;
+            margin-bottom: 0.125rem;
+        }
+        /* Nota images grid */
+        .nota-images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill,minmax(140px,1fr));
+            gap: 0.5rem;
+            justify-items: center;
+        }
+        .nota-image-item {
+            background: white;
+            border-radius: 0.375rem;
+            box-shadow: 0 2px 6px rgb(0 0 0 / 0.2);
+            overflow: hidden;
+            width: 100%;
+            max-width: 140px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .nota-image-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .nota-image-title {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #1f2937;
+            text-align: center;
+            word-break: break-word;
+            user-select: text;
+        }
+        /* Modal styles */
+        #modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 110;
+        }
+        #modal.hidden {
+            display: none;
+        }
+        #modalContent {
+            background: white;
+            border-radius: 0.5rem;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: auto;
+            padding: 1rem;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #modalImage {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 0.5rem;
+            object-fit: contain;
+        }
+        #modalTitle {
+            margin-top: 0.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            text-align: center;
+            word-break: break-word;
+        }
+        #modalClose {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            user-select: none;
+        }
+        #modalClose:focus {
+            outline: 2px solid #dc2626;
+            outline-offset: 2px;
+        }
     </style>
 </head>
 <body>
@@ -301,14 +435,42 @@
             </div>
         </div>
     </header>
-    <main class="content-wrapper container mx-auto px-4 py-8 flex-grow flex flex-col items-center">
+    <main class="content-wrapper container mx-auto px-4 py-8 flex-grow flex flex-col items-center" id="main-content">
         <div id="loading" class="loading flex justify-center items-center py-10 text-lg space-x-2">
             <i class="fas fa-spinner fa-spin text-green-400"></i>
             <span>Proses membuka data Kas 5A...</span>
         </div>
         <div id="error" class="error hidden text-red-400 text-center py-10 text-lg font-medium"></div>
-        <div id="data-container" class="grid grid-cols-1 gap-6 w-full max-w-md"></div>
+        <div id="data-container" class="grid grid-cols-1 gap-[2px] w-full max-w-md"></div>
     </main>
+    <nav class="fixed-bottom-nav" role="navigation" aria-label="Menu navigasi utama">
+        <a href="?pemasukan" id="nav-pemasukan" aria-current="page" tabindex="0">
+            <i class="fas fa-arrow-down"></i>
+            <span>Pemasukan</span>
+        </a>
+        <a href="?pengeluaran" id="nav-pengeluaran" tabindex="0">
+            <i class="fas fa-arrow-up"></i>
+            <span>Pengeluaran</span>
+        </a>
+        <a href="?nota" id="nav-nota" tabindex="0">
+            <i class="fas fa-file-invoice"></i>
+            <span>Nota</span>
+        </a>
+        <a href="?kas" id="nav-kas" tabindex="0">
+            <i class="fas fa-wallet"></i>
+            <span>Kas</span>
+        </a>
+    </nav>
+
+    <!-- Modal for image preview -->
+    <div id="modal" class="hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1">
+        <button id="modalClose" aria-label="Tutup modal">&times;</button>
+        <div id="modalContent">
+            <img id="modalImage" src="" alt="" />
+            <div id="modalTitle"></div>
+        </div>
+    </div>
+
     <script>
         const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTbsf5v7FW1ilCkFXAqiWbeUeTNP_LIfuw9VMHmQo2_c16cDGa-JAWpL9OhzJ088vmGgoJSBUeMSMzG/pub?gid=0&output=csv';
         const sheetUrl2 = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTbsf5v7FW1ilCkFXAqiWbeUeTNP_LIfuw9VMHmQo2_c16cDGa-JAWpL9OhzJ088vmGgoJSBUeMSMzG/pub?gid=1589231160&output=csv';
@@ -325,7 +487,6 @@
             ['rgb(186, 210, 255)', 'rgb(186, 186, 255)'],
             ['rgb(255, 186, 240)', 'rgb(255, 186, 225)'],
         ];
-        // Columns A to O means first 15 columns (0 to 14 index)
         function parseIndoNumber(str) {
             if (!str) return 0;
             let cleaned = str.replace(/\./g, '').replace(/,/g, '.').trim();
@@ -349,7 +510,6 @@
                 const data1 = parseCSV(csvText1);
                 const data2 = parseCSV(csvText2);
 
-                // Remove groups with key "Tidak Diketahui"
                 function filterUnknownGroup(data) {
                     const filteredData = data.data.filter(row => {
                         const key = row[data.headers[0]] || '';
@@ -360,7 +520,6 @@
                 const filteredData1 = filterUnknownGroup(data1);
                 const filteredData2 = filterUnknownGroup(data2);
 
-                // Group data by first column key
                 function groupData(data) {
                     const groupKey = data.headers[0];
                     const grouped = {};
@@ -372,25 +531,13 @@
                     return grouped;
                 }
                 const grouped1 = groupData(filteredData1);
-                // For sheetUrl2, we will not group by first column, but treat all rows as one group "Pengeluaran"
                 const pengeluaranItems = filteredData2.data;
 
-                // Prepare final ordered groups:
-                // 1. "Pemasukan" from sheetUrl (grouped1)
-                // 2. "Pengeluaran" from sheetUrl2 (all rows)
-                // 3. Then other groups from sheetUrl (grouped1) except "Pemasukan"
-
                 const finalGroups = {};
-
-                // Add "Pemasukan" first if exists in grouped1
                 if (grouped1['Pemasukan']) {
                     finalGroups['Pemasukan'] = grouped1['Pemasukan'];
                 }
-
-                // Add "Pengeluaran" group with special flag
                 finalGroups['Pengeluaran'] = pengeluaranItems;
-
-                // Add other groups from grouped1 except "Pemasukan"
                 Object.keys(grouped1).forEach(key => {
                     if (key !== 'Pemasukan') {
                         finalGroups[key] = grouped1[key];
@@ -398,7 +545,7 @@
                 });
 
                 parsedDataGlobal = { headers: filteredData1.headers, groupedData: finalGroups, pengeluaranHeaders: filteredData2.headers, pengeluaranData: pengeluaranItems };
-                displayGroupedData(parsedDataGlobal);
+                renderByQuery();
             } catch (error) {
                 showError(error.message);
             }
@@ -406,7 +553,6 @@
         function parseCSV(csvText) {
             const lines = csvText.trim().split('\n');
             const headers = lines[0].split(',').map(h => h.trim());
-            // Limit headers to first 15 columns (A to O)
             const limitedHeaders = headers.slice(0, 15);
             const result = [];
             for (let i = 1; i < lines.length; i++) {
@@ -437,35 +583,282 @@
             }
             return { headers: limitedHeaders, data: result };
         }
-        function displayGroupedData(parsedData, filterName = '') {
-            const { headers, groupedData, pengeluaranHeaders, pengeluaranData } = parsedData;
-            const groupKey = headers[0];
-            // Filter groups by filterName
-            const filteredEntries = Object.entries(groupedData).filter(([name]) => {
-                return name.toLowerCase().includes(filterName.toLowerCase());
+        function showError(message) {
+            document.getElementById('loading').classList.add('hidden');
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = `Error: ${message}`;
+            errorDiv.classList.remove('hidden');
+            document.getElementById('data-container').innerHTML = '';
+        }
+        function renderByQuery() {
+            const params = new URLSearchParams(window.location.search);
+            const key = params.keys().next().value || 'kas';
+            setActiveNav(key);
+            switch (key) {
+                case 'pemasukan':
+                    renderPemasukan();
+                    break;
+                case 'pengeluaran':
+                    renderPengeluaran();
+                    break;
+                case 'nota':
+                    renderNota();
+                    break;
+                case 'kas':
+                default:
+                    renderKas();
+                    break;
+            }
+        }
+        function setActiveNav(key) {
+            const navIds = ['pemasukan', 'pengeluaran', 'nota', 'kas'];
+            navIds.forEach(id => {
+                const el = document.getElementById('nav-' + id);
+                if (!el) return;
+                if (id === key) {
+                    el.classList.add('active');
+                    el.setAttribute('aria-current', 'page');
+                } else {
+                    el.classList.remove('active');
+                    el.removeAttribute('aria-current');
+                }
             });
-            if (filteredEntries.length === 0) {
-                document.getElementById('data-container').innerHTML = `<p class="text-center text-gray-400 col-span-full">Nama "${filterName}" tidak ditemukan.</p>`;
-                document.getElementById('loading').classList.add('hidden');
-                document.getElementById('error').classList.add('hidden');
+        }
+        function renderPemasukan() {
+            if (!parsedDataGlobal) return;
+            const pemasukanItems = parsedDataGlobal.groupedData['Pemasukan'] || [];
+            if (pemasukanItems.length === 0) {
+                document.getElementById('data-container').innerHTML = `<p class="text-center text-gray-400">Data Pemasukan tidak tersedia.</p>`;
                 return;
             }
+            const headers = parsedDataGlobal.headers;
+            const gradient = gradients[0];
+            const bgStyle = `background: linear-gradient(135deg, ${gradient[0]}, ${gradient[1]});`;
+            let html = `
+                <article class="nota-box p-6 flex flex-col shadow-md expanded" style="${bgStyle}">
+                    <header><h2>Pemasukan</h2></header>
+                    <div class="flex-grow space-y-3 mt-3">
+            `;
+            pemasukanItems.forEach(item => {
+                html += `<section class="border border-gray-300 rounded p-3 bg-white text-black">`;
+                headers.forEach(header => {
+                    if (header === headers[0]) return;
+                    if (header.toLowerCase() === 'kurang') return;
+                    const value = item[header] || '-';
+                    if (header.toLowerCase() === 'total') {
+                        html += `
+                            <div class="flex justify-between text-sm total-section">
+                                <span class="font-bold">${header}</span>
+                                <span class="font-bold">${value}</span>
+                            </div>
+                        `;
+                    } else {
+                        html += `
+                            <div class="flex justify-between text-sm">
+                                <span class="font-medium">${header}</span>
+                                <span class="text-right break-words">${value}</span>
+                            </div>
+                        `;
+                    }
+                });
+                html += `</section>`;
+            });
+            html += `</div></article>`;
+            document.getElementById('data-container').innerHTML = html;
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('error').classList.add('hidden');
+        }
+        function renderPengeluaran() {
+            if (!parsedDataGlobal) return;
+            const pengeluaranItems = parsedDataGlobal.groupedData['Pengeluaran'] || [];
+            if (pengeluaranItems.length === 0) {
+                document.getElementById('data-container').innerHTML = `<p class="text-center text-gray-400">Data Pengeluaran tidak tersedia.</p>`;
+                return;
+            }
+            const pengeluaranHeaders = parsedDataGlobal.pengeluaranHeaders;
+            const gradient = gradients[1];
+            const bgStyle = `background: linear-gradient(135deg, ${gradient[0]}, ${gradient[1]});`;
+            let html = `
+                <article class="nota-box p-6 flex flex-col shadow-md expanded" style="${bgStyle}">
+                    <header><h2>Pengeluaran</h2></header>
+                    <div class="flex-grow space-y-3 mt-3">
+            `;
+            const neededHeaders = ['Tanggal', 'Jenis', 'Jumlah', 'Total KAS'];
+            const headerMap = {};
+            neededHeaders.forEach(needed => {
+                const found = pengeluaranHeaders.find(h => h.trim().toLowerCase() === needed.toLowerCase());
+                if (found) headerMap[needed] = found;
+            });
+            pengeluaranItems.forEach(item => {
+                html += `<section class="border border-gray-300 rounded p-3 bg-white text-black">`;
+                neededHeaders.forEach(needed => {
+                    if (!headerMap[needed]) return;
+                    const value = item[headerMap[needed]] || '-';
+                    let displayLabel = needed;
+                    if (needed === 'Jenis') displayLabel = 'Keperluan';
+                    if (needed === 'Jumlah') displayLabel = 'Pengeluaran';
+                    html += `
+                        <div class="flex justify-between text-sm">
+                            <span class="font-medium">${displayLabel}</span>
+                            <span class="text-right break-words">${value}</span>
+                        </div>
+                    `;
+                });
+                html += `</section>`;
+            });
+            if (pengeluaranItems.length > 0) {
+                const lastRow = pengeluaranItems[pengeluaranItems.length - 1];
+                const colDHeader = pengeluaranHeaders[3] || null;
+                const colDValue = colDHeader ? (lastRow[colDHeader] || '-') : '-';
+                html += `
+                    <div class="mt-4 text-right font-semibold text-black bg-white p-2 rounded border border-gray-300" style="text-align: center;">
+                      Sisa KAS  ${colDValue}
+                    </div>
+                    <a href="/nota" class="nota-button" tabindex="0" role="button">Nota Pengeluaran</a>
+                `;
+            }
+            html += `</div></article>`;
+            document.getElementById('data-container').innerHTML = html;
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('error').classList.add('hidden');
+        }
+        // Nota rendering with GitHub API fetch
+        const repoOwner = 'sdn3jaten';
+        const repoName = 'sdn3jaten.github.io';
+        const folderPath = 'nota';
+
+        async function fetchImages() {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${folderPath}`);
+                if (!response.ok) {
+                    throw new Error(`Gagal mengambil data: ${response.status}`);
+                }
+                const files = await response.json();
+                displayImages(files);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('data-container').innerHTML = `
+                    <div class="error text-red-400 text-center py-16 text-xl font-semibold select-none">
+                        <p>Gagal memuat gambar. Pastikan folder berisi gambar.</p>
+                        <p>Detail: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        function formatTitle(filename) {
+            let name = filename.replace(/\.[^/.]+$/, "");
+            name = name.replace(/[-_]+/g, " ");
+            name = name.replace(/\b\w/g, c => c.toUpperCase());
+            return name;
+        }
+        function displayImages(files) {
+            const container = document.getElementById('data-container');
+            container.innerHTML = '';
+            const imageFiles = files.filter(file => {
+                const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
+                return imageExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
+            });
+            if (imageFiles.length === 0) {
+                container.innerHTML = `
+                    <div class="error text-red-400 text-center py-16 text-xl font-semibold select-none">
+                        <p>Belum ada</p>
+                        <p>Nota Pengeluaran</p>
+                    </div>
+                `;
+                return;
+            }
+            const grid = document.createElement('div');
+            grid.className = 'nota-images-grid';
+            imageFiles.forEach(file => {
+                const item = document.createElement('div');
+                item.className = 'nota-image-item rounded-3xl overflow-hidden shadow-2xl hover:shadow-teal-500/70 transition-shadow duration-300 bg-white cursor-pointer flex flex-col select-none';
+
+                const img = document.createElement('img');
+                img.src = file.download_url;
+                img.alt = formatTitle(file.name);
+                img.loading = 'lazy';
+                img.className = 'w-full aspect-square object-cover block rounded-t-3xl';
+
+                const title = document.createElement('p');
+                title.textContent = formatTitle(file.name);
+                title.className = 'nota-image-title';
+
+                item.appendChild(img);
+                item.appendChild(title);
+
+                item.addEventListener('click', () => {
+                    openModal(file.download_url, formatTitle(file.name));
+                });
+
+                grid.appendChild(item);
+            });
+            container.appendChild(grid);
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('error').classList.add('hidden');
+        }
+        function openModal(src, title) {
+            const modal = document.getElementById('modal');
+            const modalImage = document.getElementById('modalImage');
+            const modalTitle = document.getElementById('modalTitle');
+
+            modalImage.src = src;
+            modalImage.alt = title;
+            modalTitle.textContent = title;
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            const modalImage = document.getElementById('modalImage');
+
+            modal.classList.add('hidden');
+            modalImage.src = '';
+            modalImage.alt = '';
+            document.body.style.overflow = '';
+        }
+        document.getElementById('modalClose').addEventListener('click', closeModal);
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') {
+                closeModal();
+            }
+        });
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('modal');
+                if (!modal.classList.contains('hidden')) {
+                    closeModal();
+                }
+            }
+        });
+        function renderNota() {
+            fetchImages();
+        }
+        function renderKas() {
+            if (!parsedDataGlobal) return;
+            const { groupedData, headers, pengeluaranHeaders, pengeluaranData } = parsedDataGlobal;
+            const groupKeys = Object.keys(groupedData).sort((a,b) => a.localeCompare(b, 'id'));
+            const lowerKeys = groupKeys.map(k => k.toLowerCase());
+            const startIndex = lowerKeys.findIndex(k => k === 'almaira');
+            const endIndex = lowerKeys.findIndex(k => k === 'azka');
+            let filteredKeys = groupKeys;
+            if (startIndex !== -1 && endIndex !== -1 && endIndex >= startIndex) {
+                filteredKeys = groupKeys.slice(startIndex, endIndex + 1);
+            }
             let html = '';
-            filteredEntries.forEach(([name, items], index) => {
+            filteredKeys.forEach((name, index) => {
+                const items = groupedData[name];
                 const gradient = gradients[index % gradients.length];
                 const bgStyle = `background: linear-gradient(135deg, ${gradient[0]}, ${gradient[1]});`;
                 html += `
-                <article class="nota-box p-6 flex flex-col shadow-md" style="${bgStyle}">
-                    <header>
+                <article class="nota-box collapsed" style="${bgStyle}" data-group-name="${name}">
+                    <header tabindex="0" role="button" aria-expanded="false" aria-controls="content-${index}" id="header-${index}">
                         <h2>${name}</h2>
                     </header>
-                    <div class="flex-grow space-y-3 mt-3">
+                    <div id="content-${index}" class="content px-6 pb-6 hidden" aria-labelledby="header-${index}">
                 `;
                 if (name === 'Pengeluaran') {
-                    // Show only columns: Tanggal, Jenis, Jumlah, Total KAS
-                    // Find actual header names matching these (case insensitive)
                     const neededHeaders = ['Tanggal', 'Jenis', 'Jumlah', 'Total KAS'];
-                    // Map to actual headers in pengeluaranHeaders ignoring case and trimming
                     const headerMap = {};
                     neededHeaders.forEach(needed => {
                         const found = pengeluaranHeaders.find(h => h.trim().toLowerCase() === needed.toLowerCase());
@@ -488,29 +881,359 @@
                         });
                         html += `</section>`;
                     });
-                    // Display content of column D from last row at bottom right
                     if (pengeluaranData.length > 0) {
                         const lastRow = pengeluaranData[pengeluaranData.length - 1];
-                        // Column D is index 3 in headers array (0-based)
                         const colDHeader = pengeluaranHeaders[3] || null;
                         const colDValue = colDHeader ? (lastRow[colDHeader] || '-') : '-';
                         html += `
                             <div class="mt-4 text-right font-semibold text-black bg-white p-2 rounded border border-gray-300" style="text-align: center;">
                               Sisa KAS  ${colDValue}
                             </div>
-                            <a href="/nota" class="nota-button" tabindex="0" role="button">Nota Pengeluaran</a>
+                            <a href="?nota" class="nota-button" tabindex="0" role="button">Nota Pengeluaran</a>
                         `;
                     }
                 } else {
-                    // Normal display for other groups
                     items.forEach((item) => {
                         html += `<section class="border border-gray-300 rounded p-3 bg-white text-black">`;
                         headers.forEach(header => {
-                            if (header === groupKey) return;
-                            // For first box "pemasukan" skip "Kurang" field
-                            if (index === 0 && name.toLowerCase() === 'pemasukan' && header.toLowerCase() === 'kurang') {
-                                return;
+                            if (header === headers[0]) return;
+                            if (header.toLowerCase() === 'total') {
+                                const totalValue = item[header] || '-';
+                                html += `
+                                    <div class="flex justify-between text-sm total-section">
+                                        <span class="font-bold">${header}</span>
+                                        <span class="font-bold">${totalValue}</span>
+                                    </div>
+                                `;
+                            } else if (header.toLowerCase() === 'kurang') {
+                                const totalRaw = item['Total'] || item['total'] || '';
+                                const totalNum = parseIndoNumber(totalRaw);
+                                const kurangRaw = item[header] || '';
+                                if (totalNum === 180000) {
+                                    html += `
+                                        <div class="flex justify-between text-sm">
+                                            <span class="font-medium">${header}</span>
+                                            <span class="lunas-green">LUNAS</span>
+                                        </div>
+                                    `;
+                                } else {
+                                    html += `
+                                        <div class="flex justify-between text-sm kurang-red">
+                                            <span class="font-medium">${header}</span>
+                                            <span>${kurangRaw || '-'}</span>
+                                        </div>
+                                    `;
+                                }
+                            } else {
+                                const value = item[header] || '-';
+                                html += `
+                                    <div class="flex justify-between text-sm">
+                                        <span class="font-medium">${header}</span>
+                                        <span class="text-right break-words">${value}</span>
+                                    </div>
+                                `;
                             }
+                        });
+                        html += `</section>`;
+                    });
+                }
+                html += `
+                    </div>
+                </article>`;
+            });
+            if (html === '') {
+                html = `<p class="text-center text-gray-400">Data Kas tidak tersedia.</p>`;
+            }
+            const container = document.getElementById('data-container');
+            container.innerHTML = html;
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('error').classList.add('hidden');
+
+            const boxes = container.querySelectorAll('.nota-box');
+            boxes.forEach(box => {
+                const header = box.querySelector('header');
+                const content = box.querySelector('.content');
+                header.addEventListener('click', () => {
+                    toggleBox(box);
+                });
+                header.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        toggleBox(box);
+                    }
+                });
+            });
+        }
+        function toggleBox(boxToToggle) {
+            const container = document.getElementById('data-container');
+            const boxes = container.querySelectorAll('.nota-box');
+            boxes.forEach(box => {
+                const header = box.querySelector('header');
+                const content = box.querySelector('.content');
+                if (box === boxToToggle) {
+                    const isCollapsed = box.classList.contains('collapsed');
+                    if (isCollapsed) {
+                        box.classList.remove('collapsed');
+                        box.classList.add('expanded');
+                        content.classList.remove('hidden');
+                        header.setAttribute('aria-expanded', 'true');
+                    } else {
+                        box.classList.remove('expanded');
+                        box.classList.add('collapsed');
+                        content.classList.add('hidden');
+                        header.setAttribute('aria-expanded', 'false');
+                    }
+                } else {
+                    box.classList.remove('expanded');
+                    box.classList.add('collapsed');
+                    if (box.querySelector('.content')) {
+                        box.querySelector('.content').classList.add('hidden');
+                    }
+                    if (header) {
+                        header.setAttribute('aria-expanded', 'false');
+                    }
+                }
+            });
+        }
+        if (window.innerWidth > 480) {
+            document.querySelector('meta[name=viewport]').setAttribute('content', 'width=480, initial-scale=1, maximum-scale=1, user-scalable=no');
+        }
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchSheetData();
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('input', (e) => {
+                const filter = e.target.value.trim();
+                if (!parsedDataGlobal) return;
+                if (filter === '') {
+                    renderByQuery();
+                    return;
+                }
+                displayFilteredAllGroups(filter);
+            });
+            const navLinks = document.querySelectorAll('nav.fixed-bottom-nav a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const href = link.getAttribute('href');
+                    if (!href) return;
+                    const url = new URL(href, window.location.origin);
+                    history.pushState(null, '', url.search);
+                    renderByQuery();
+                    document.getElementById('search-input').value = '';
+                });
+            });
+            window.addEventListener('popstate', () => {
+                renderByQuery();
+                document.getElementById('search-input').value = '';
+            });
+            const popup1 = document.getElementById('popup-notification');
+            const closeBtn1 = popup1.querySelector('button.close-btn');
+            const popup2 = document.getElementById('popup-notification-2');
+            const closeBtn2 = popup2.querySelector('button.close-btn');
+
+            let autoCloseTimeout1 = null;
+            let autoCloseTimeout2 = null;
+
+            function closePopup1() {
+                if (popup1.style.display !== 'none') {
+                    popup1.style.display = 'none';
+                    if (autoCloseTimeout1) {
+                        clearTimeout(autoCloseTimeout1);
+                        autoCloseTimeout1 = null;
+                    }
+                }
+            }
+            function closePopup2() {
+                if (popup2.style.display !== 'none') {
+                    popup2.style.display = 'none';
+                    if (autoCloseTimeout2) {
+                        clearTimeout(autoCloseTimeout2);
+                        autoCloseTimeout2 = null;
+                    }
+                }
+            }
+
+            closeBtn1.addEventListener('click', () => {
+                closePopup1();
+            });
+            closeBtn2.addEventListener('click', () => {
+                closePopup2();
+            });
+
+            setTimeout(() => {
+                popup1.style.display = 'flex';
+                setTimeout(() => {
+                    popup2.style.display = 'flex';
+                }, 10000);
+                autoCloseTimeout1 = setTimeout(() => {
+                    closePopup1();
+                    closePopup2();
+                }, 60000);
+            }, 10000);
+        });
+        function displayFilteredAllGroups(filter) {
+            if (!parsedDataGlobal) return;
+            const { groupedData, headers, pengeluaranHeaders, pengeluaranData } = parsedDataGlobal;
+            const groupKeys = Object.keys(groupedData).sort((a,b) => a.localeCompare(b, 'id'));
+            const lowerFilter = filter.toLowerCase();
+            const exactMatchKey = groupKeys.find(k => k.toLowerCase() === lowerFilter);
+            if (exactMatchKey) {
+                const items = groupedData[exactMatchKey];
+                const gradient = gradients[0];
+                const bgStyle = `background: linear-gradient(135deg, ${gradient[0]}, ${gradient[1]});`;
+                let html = `
+                <article class="nota-box expanded" style="${bgStyle}" data-group-name="${exactMatchKey}">
+                    <header tabindex="0" role="button" aria-expanded="true" aria-controls="content-exact" id="header-exact">
+                        <h2>${exactMatchKey}</h2>
+                    </header>
+                    <div id="content-exact" class="content px-6 pb-6" aria-labelledby="header-exact">
+                `;
+                if (exactMatchKey === 'Pengeluaran') {
+                    const neededHeaders = ['Tanggal', 'Jenis', 'Jumlah', 'Total KAS'];
+                    const headerMap = {};
+                    neededHeaders.forEach(needed => {
+                        const found = pengeluaranHeaders.find(h => h.trim().toLowerCase() === needed.toLowerCase());
+                        if (found) headerMap[needed] = found;
+                    });
+                    items.forEach(item => {
+                        html += `<section class="border border-gray-300 rounded p-3 bg-white text-black">`;
+                        neededHeaders.forEach(needed => {
+                            if (!headerMap[needed]) return;
+                            const value = item[headerMap[needed]] || '-';
+                            let displayLabel = needed;
+                            if (needed === 'Jenis') displayLabel = 'Keperluan';
+                            if (needed === 'Jumlah') displayLabel = 'Pengeluaran';
+                            html += `
+                                <div class="flex justify-between text-sm">
+                                    <span class="font-medium">${displayLabel}</span>
+                                    <span class="text-right break-words">${value}</span>
+                                </div>
+                            `;
+                        });
+                        html += `</section>`;
+                    });
+                    if (pengeluaranData.length > 0) {
+                        const lastRow = pengeluaranData[pengeluaranData.length - 1];
+                        const colDHeader = pengeluaranHeaders[3] || null;
+                        const colDValue = colDHeader ? (lastRow[colDHeader] || '-') : '-';
+                        html += `
+                            <div class="mt-4 text-right font-semibold text-black bg-white p-2 rounded border border-gray-300" style="text-align: center;">
+                              Sisa KAS  ${colDValue}
+                            </div>
+                            <a href="?nota" class="nota-button" tabindex="0" role="button">Nota Pengeluaran</a>
+                        `;
+                    }
+                } else {
+                    items.forEach((item) => {
+                        html += `<section class="border border-gray-300 rounded p-3 bg-white text-black">`;
+                        headers.forEach(header => {
+                            if (header === headers[0]) return;
+                            if (header.toLowerCase() === 'total') {
+                                const totalValue = item[header] || '-';
+                                html += `
+                                    <div class="flex justify-between text-sm total-section">
+                                        <span class="font-bold">${header}</span>
+                                        <span class="font-bold">${totalValue}</span>
+                                    </div>
+                                `;
+                            } else if (header.toLowerCase() === 'kurang') {
+                                const totalRaw = item['Total'] || item['total'] || '';
+                                const totalNum = parseIndoNumber(totalRaw);
+                                const kurangRaw = item[header] || '';
+                                if (totalNum === 180000) {
+                                    html += `
+                                        <div class="flex justify-between text-sm">
+                                            <span class="font-medium">${header}</span>
+                                            <span class="lunas-green">LUNAS</span>
+                                        </div>
+                                    `;
+                                } else {
+                                    html += `
+                                        <div class="flex justify-between text-sm kurang-red">
+                                            <span class="font-medium">${header}</span>
+                                            <span>${kurangRaw || '-'}</span>
+                                        </div>
+                                    `;
+                                }
+                            } else {
+                                const value = item[header] || '-';
+                                html += `
+                                    <div class="flex justify-between text-sm">
+                                        <span class="font-medium">${header}</span>
+                                        <span class="text-right break-words">${value}</span>
+                                    </div>
+                                `;
+                            }
+                        });
+                        html += `</section>`;
+                    });
+                }
+                html += `
+                    </div>
+                </article>`;
+                const container = document.getElementById('data-container');
+                container.innerHTML = html;
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('error').classList.add('hidden');
+                return;
+            }
+            const filteredKeys = groupKeys.filter(k => k.toLowerCase().includes(lowerFilter));
+            if (filteredKeys.length === 0) {
+                document.getElementById('data-container').innerHTML = `<p class="text-center text-gray-400">Nama "${filter}" tidak ditemukan.</p>`;
+                return;
+            }
+            let html = '';
+            filteredKeys.forEach((name, index) => {
+                const items = groupedData[name];
+                const gradient = gradients[index % gradients.length];
+                const bgStyle = `background: linear-gradient(135deg, ${gradient[0]}, ${gradient[1]});`;
+                html += `
+                <article class="nota-box collapsed" style="${bgStyle}" data-group-name="${name}">
+                    <header tabindex="0" role="button" aria-expanded="false" aria-controls="content-all-${index}" id="header-all-${index}">
+                        <h2>${name}</h2>
+                    </header>
+                    <div id="content-all-${index}" class="content px-6 pb-6 hidden" aria-labelledby="header-all-${index}">
+                `;
+                if (name === 'Pengeluaran') {
+                    const neededHeaders = ['Tanggal', 'Jenis', 'Jumlah', 'Total KAS'];
+                    const headerMap = {};
+                    neededHeaders.forEach(needed => {
+                        const found = pengeluaranHeaders.find(h => h.trim().toLowerCase() === needed.toLowerCase());
+                        if (found) headerMap[needed] = found;
+                    });
+                    items.forEach(item => {
+                        html += `<section class="border border-gray-300 rounded p-3 bg-white text-black">`;
+                        neededHeaders.forEach(needed => {
+                            if (!headerMap[needed]) return;
+                            const value = item[headerMap[needed]] || '-';
+                            let displayLabel = needed;
+                            if (needed === 'Jenis') displayLabel = 'Keperluan';
+                            if (needed === 'Jumlah') displayLabel = 'Pengeluaran';
+                            html += `
+                                <div class="flex justify-between text-sm">
+                                    <span class="font-medium">${displayLabel}</span>
+                                    <span class="text-right break-words">${value}</span>
+                                </div>
+                            `;
+                        });
+                        html += `</section>`;
+                    });
+                    if (pengeluaranData.length > 0) {
+                        const lastRow = pengeluaranData[pengeluaranData.length - 1];
+                        const colDHeader = pengeluaranHeaders[3] || null;
+                        const colDValue = colDHeader ? (lastRow[colDHeader] || '-') : '-';
+                        html += `
+                            <div class="mt-4 text-right font-semibold text-black bg-white p-2 rounded border border-gray-300" style="text-align: center;">
+                              Sisa KAS  ${colDValue}
+                            </div>
+                            <a href="?nota" class="nota-button" tabindex="0" role="button">Nota Pengeluaran</a>
+                        `;
+                    }
+                } else {
+                    items.forEach((item) => {
+                        html += `<section class="border border-gray-300 rounded p-3 bg-white text-black">`;
+                        headers.forEach(header => {
+                            if (header === headers[0]) return;
                             if (header.toLowerCase() === 'total') {
                                 const totalValue = item[header] || '-';
                                 html += `
@@ -559,76 +1282,142 @@
             container.innerHTML = html;
             document.getElementById('loading').classList.add('hidden');
             document.getElementById('error').classList.add('hidden');
+
+            const boxes = container.querySelectorAll('.nota-box');
+            boxes.forEach(box => {
+                const header = box.querySelector('header');
+                const content = box.querySelector('.content');
+                header.addEventListener('click', () => {
+                    toggleBox(box);
+                });
+                header.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        toggleBox(box);
+                    }
+                });
+            });
         }
-        function showError(message) {
+    </script>
+
+    <!-- Modal for image preview -->
+    <div id="modal" class="hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1">
+        <button id="modalClose" aria-label="Tutup modal">&times;</button>
+        <div id="modalContent">
+            <img id="modalImage" src="" alt="" />
+            <div id="modalTitle"></div>
+        </div>
+    </div>
+
+    <script>
+        // Nota images GitHub API config and functions
+        const repoOwner = 'sdn3jaten';
+        const repoName = 'sdn3jaten.github.io';
+        const folderPath = 'nota';
+
+        async function fetchImages() {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${folderPath}`);
+                if (!response.ok) {
+                    throw new Error(`Gagal mengambil data: ${response.status}`);
+                }
+                const files = await response.json();
+                displayImages(files);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('data-container').innerHTML = `
+                    <div class="error text-red-400 text-center py-16 text-xl font-semibold select-none">
+                        <p>Gagal memuat gambar. Pastikan folder berisi gambar.</p>
+                        <p>Detail: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        function formatTitle(filename) {
+            let name = filename.replace(/\.[^/.]+$/, "");
+            name = name.replace(/[-_]+/g, " ");
+            name = name.replace(/\b\w/g, c => c.toUpperCase());
+            return name;
+        }
+        function displayImages(files) {
+            const container = document.getElementById('data-container');
+            container.innerHTML = '';
+            const imageFiles = files.filter(file => {
+                const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
+                return imageExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
+            });
+            if (imageFiles.length === 0) {
+                container.innerHTML = `
+                    <div class="error text-red-400 text-center py-16 text-xl font-semibold select-none">
+                        <p>Belum ada</p>
+                        <p>Nota Pengeluaran</p>
+                    </div>
+                `;
+                return;
+            }
+            const grid = document.createElement('div');
+            grid.className = 'nota-images-grid';
+            imageFiles.forEach(file => {
+                const item = document.createElement('div');
+                item.className = 'nota-image-item rounded-3xl overflow-hidden shadow-2xl hover:shadow-teal-500/70 transition-shadow duration-300 bg-white cursor-pointer flex flex-col select-none';
+
+                const img = document.createElement('img');
+                img.src = file.download_url;
+                img.alt = formatTitle(file.name);
+                img.loading = 'lazy';
+                img.className = 'w-full aspect-square object-cover block rounded-t-3xl';
+
+                const title = document.createElement('p');
+                title.textContent = formatTitle(file.name);
+                title.className = 'nota-image-title';
+
+                item.appendChild(img);
+                item.appendChild(title);
+
+                item.addEventListener('click', () => {
+                    openModal(file.download_url, formatTitle(file.name));
+                });
+
+                grid.appendChild(item);
+            });
+            container.appendChild(grid);
             document.getElementById('loading').classList.add('hidden');
-            const errorDiv = document.getElementById('error');
-            errorDiv.textContent = `Error: ${message}`;
-            errorDiv.classList.remove('hidden');
-            document.getElementById('data-container').innerHTML = '';
+            document.getElementById('error').classList.add('hidden');
         }
-        // Redirect desktop users to mobile layout by forcing viewport width and scale
-        if (window.innerWidth > 480) {
-            document.querySelector('meta[name=viewport]').setAttribute('content', 'width=480, initial-scale=1, maximum-scale=1, user-scalable=no');
+        function openModal(src, title) {
+            const modal = document.getElementById('modal');
+            const modalImage = document.getElementById('modalImage');
+            const modalTitle = document.getElementById('modalTitle');
+
+            modalImage.src = src;
+            modalImage.alt = title;
+            modalTitle.textContent = title;
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
         }
-        window.addEventListener('DOMContentLoaded', () => {
-            fetchSheetData();
-            const searchInput = document.getElementById('search-input');
-            searchInput.addEventListener('input', (e) => {
-                const filter = e.target.value.trim();
-                if (parsedDataGlobal) {
-                    displayGroupedData(parsedDataGlobal, filter);
-                }
-            });
-            const popup1 = document.getElementById('popup-notification');
-            const closeBtn1 = popup1.querySelector('button.close-btn');
-            const popup2 = document.getElementById('popup-notification-2');
-            const closeBtn2 = popup2.querySelector('button.close-btn');
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            const modalImage = document.getElementById('modalImage');
 
-            let autoCloseTimeout1 = null;
-            let autoCloseTimeout2 = null;
-
-            function closePopup1() {
-                if (popup1.style.display !== 'none') {
-                    popup1.style.display = 'none';
-                    if (autoCloseTimeout1) {
-                        clearTimeout(autoCloseTimeout1);
-                        autoCloseTimeout1 = null;
-                    }
+            modal.classList.add('hidden');
+            modalImage.src = '';
+            modalImage.alt = '';
+            document.body.style.overflow = '';
+        }
+        document.getElementById('modalClose').addEventListener('click', closeModal);
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') {
+                closeModal();
+            }
+        });
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('modal');
+                if (!modal.classList.contains('hidden')) {
+                    closeModal();
                 }
             }
-            function closePopup2() {
-                if (popup2.style.display !== 'none') {
-                    popup2.style.display = 'none';
-                    if (autoCloseTimeout2) {
-                        clearTimeout(autoCloseTimeout2);
-                        autoCloseTimeout2 = null;
-                    }
-                }
-            }
-
-            closeBtn1.addEventListener('click', () => {
-                closePopup1();
-            });
-            closeBtn2.addEventListener('click', () => {
-                closePopup2();
-            });
-
-            // Show popup1 after 10 seconds
-            setTimeout(() => {
-                popup1.style.display = 'flex';
-
-                // Show popup2 after 20 seconds from page load (10 seconds after popup1)
-                setTimeout(() => {
-                    popup2.style.display = 'flex';
-                }, 10000);
-
-                // Auto close both popups 30 seconds after popup1 appears
-                autoCloseTimeout1 = setTimeout(() => {
-                    closePopup1();
-                    closePopup2();
-                }, 60000);
-            }, 10000);
         });
     </script>
 </body>
