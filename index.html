@@ -450,21 +450,14 @@
         <div id="data-container" class="grid grid-cols-1 gap-[2px] w-full max-w-md"></div>
     </main>
     <nav class="fixed-bottom-nav" role="navigation" aria-label="Menu navigasi utama">
-        <a href="?pemasukan" id="nav-pemasukan" aria-current="page" tabindex="0">
-            <i class="fas fa-arrow-down"></i>
-            <span>Pemasukan</span>
-        </a>
-
-<a href="?kas" id="nav-kas" tabindex="0">
+        <a href="?kas" id="nav-kas" tabindex="0">
             <i class="fas fa-wallet"></i>
-            <span>Kas</span>
+            <span>Cek Pembayaran</span>
         </a>
-        <a href="?pengeluaran" id="nav-pengeluaran" tabindex="0">
-            <i class="fas fa-arrow-up"></i>
-            <span>Pengeluaran</span>
+        <a href="?saldokas" id="nav-saldokas" tabindex="0">
+            <i class="fas fa-coins"></i>
+            <span>Cek Saldo Kas</span>
         </a>
-        
-        
     </nav>
 
     <!-- Modal for image preview -->
@@ -614,11 +607,8 @@
             const key = params.keys().next().value || 'kas';
             setActiveNav(key);
             switch (key) {
-                case 'pemasukan':
-                    renderPemasukan();
-                    break;
-                case 'pengeluaran':
-                    renderPengeluaran();
+                case 'saldokas':
+                    renderSaldoKas();
                     break;
                 case 'nota':
                     renderNota();
@@ -630,7 +620,7 @@
             }
         }
         function setActiveNav(key) {
-            const navIds = ['pemasukan', 'pengeluaran', 'nota', 'kas'];
+            const navIds = ['saldokas', 'kas', 'nota'];
             navIds.forEach(id => {
                 const el = document.getElementById('nav-' + id);
                 if (!el) return;
@@ -643,101 +633,183 @@
                 }
             });
         }
-        function renderPemasukan() {
+        // Render function for "Cek Saldo Kas" (formerly pemasukan + pengeluaran stacked)
+        function renderSaldoKas() {
             if (!parsedDataGlobal) return;
             const pemasukanItems = parsedDataGlobal.groupedData['Pemasukan'] || [];
+            const pengeluaranItems = parsedDataGlobal.groupedData['Pengeluaran'] || [];
+            const pemasukanHeaders = parsedDataGlobal.headers;
+            const pengeluaranHeaders = parsedDataGlobal.pengeluaranHeaders;
+
+            let html = '';
+
+            // Pemasukan box
             if (pemasukanItems.length === 0) {
-                document.getElementById('data-container').innerHTML = `<p class="text-center text-gray-400">Data Pemasukan tidak tersedia.</p>`;
-                return;
+                html += `<p class="text-center text-gray-400">Data Pemasukan tidak tersedia.</p>`;
+            } else {
+                const gradientPemasukan = gradients[0];
+                const bgStylePemasukan = `background: linear-gradient(135deg, ${gradientPemasukan[0]}, ${gradientPemasukan[1]});`;
+                html += `
+                    <article class="nota-box p-6 flex flex-col shadow-md expanded" style="${bgStylePemasukan}">
+                        <header><h2>Pemasukan</h2></header>
+                        <div class="flex-grow space-y-3 mt-3">
+                `;
+                pemasukanItems.forEach(item => {
+                    html += `<section class="border border-gray-300 rounded p-3 bg-white text-black">`;
+                    pemasukanHeaders.forEach(header => {
+                        if (header === pemasukanHeaders[0]) return;
+                        if (header.toLowerCase() === 'kurang') return;
+                        const value = item[header] || '-';
+                        if (header.toLowerCase() === 'total') {
+                            html += `
+                                <div class="flex justify-between text-sm total-section">
+                                    <span class="font-bold">${header}</span>
+                                    <span class="font-bold">${value}</span>
+                                </div>
+                            `;
+                        } else {
+                            html += `
+                                <div class="flex justify-between text-sm">
+                                    <span class="font-medium">${header}</span>
+                                    <span class="text-right break-words">${value}</span>
+                                </div>
+                            `;
+                        }
+                    });
+                    html += `</section>`;
+                });
+                html += `</div></article>`;
             }
-            const headers = parsedDataGlobal.headers;
-            const gradient = gradients[0];
-            const bgStyle = `background: linear-gradient(135deg, ${gradient[0]}, ${gradient[1]});`;
-            let html = `
-                <article class="nota-box p-6 flex flex-col shadow-md expanded" style="${bgStyle}">
-                    <header><h2>Pemasukan</h2></header>
-                    <div class="flex-grow space-y-3 mt-3">
-            `;
-            pemasukanItems.forEach(item => {
-                html += `<section class="border border-gray-300 rounded p-3 bg-white text-black">`;
-                headers.forEach(header => {
-                    if (header === headers[0]) return;
-                    if (header.toLowerCase() === 'kurang') return;
-                    const value = item[header] || '-';
-                    if (header.toLowerCase() === 'total') {
-                        html += `
-                            <div class="flex justify-between text-sm total-section">
-                                <span class="font-bold">${header}</span>
-                                <span class="font-bold">${value}</span>
-                            </div>
-                        `;
-                    } else {
+
+            // Pengeluaran box below Pemasukan
+            if (pengeluaranItems.length === 0) {
+                html += `<p class="text-center text-gray-400 mt-4">Data Pengeluaran tidak tersedia.</p>`;
+            } else {
+                const gradientPengeluaran = gradients[1];
+                const bgStylePengeluaran = `background: linear-gradient(135deg, ${gradientPengeluaran[0]}, ${gradientPengeluaran[1]});`;
+                html += `                    <article class="nota-box p-6 flex flex-col shadow-md expanded mt-4" style="${bgStylePengeluaran}">
+                        <header><h2>Pengeluaran</h2></header>
+                        <div class="flex-grow space-y-3 mt-3">
+                `;
+                const neededHeaders = ['Tanggal', 'Jenis', 'Jumlah', 'Total KAS'];
+                const headerMap = {};
+                neededHeaders.forEach(needed => {
+                    const found = pengeluaranHeaders.find(h => h.trim().toLowerCase() === needed.toLowerCase());
+                    if (found) headerMap[needed] = found;
+                });
+                pengeluaranItems.forEach(item => {
+                    html += `<section class="border border-gray-300 rounded p-3 bg-white text-black">`;
+                    neededHeaders.forEach(needed => {
+                        if (!headerMap[needed]) return;
+                        const value = item[headerMap[needed]] || '-';
+                        let displayLabel = needed;
+                        if (needed === 'Jenis') displayLabel = 'Keperluan';
+                        if (needed === 'Jumlah') displayLabel = 'Pengeluaran';
                         html += `
                             <div class="flex justify-between text-sm">
-                                <span class="font-medium">${header}</span>
+                                <span class="font-medium">${displayLabel}</span>
                                 <span class="text-right break-words">${value}</span>
                             </div>
                         `;
-                    }
+                    });
+                    html += `</section>`;
                 });
-                html += `</section>`;
-            });
-            html += `</div></article>`;
+                if (pengeluaranItems.length > 0) {
+                    const lastRow = pengeluaranItems[pengeluaranItems.length - 1];
+                    const colDHeader = pengeluaranHeaders[3] || null;
+                    const colDValue = colDHeader ? (lastRow[colDHeader] || '-') : '-';
+                    html += `
+                        <div class="mt-4 text-right font-semibold text-black bg-white p-2 rounded border border-gray-300" style="text-align: center;">
+                          Sisa KAS  ${colDValue}
+                        </div>
+                        <a href="?nota" class="nota-button" tabindex="0" role="button">Nota Pengeluaran</a>
+                    `;
+                }
+                html += `</div></article>`;
+            }
+
             document.getElementById('data-container').innerHTML = html;
             document.getElementById('loading').classList.add('hidden');
             document.getElementById('error').classList.add('hidden');
         }
-        function renderPengeluaran() {
+        function renderKas() {
             if (!parsedDataGlobal) return;
-            const pengeluaranItems = parsedDataGlobal.groupedData['Pengeluaran'] || [];
-            if (pengeluaranItems.length === 0) {
-                document.getElementById('data-container').innerHTML = `<p class="text-center text-gray-400">Data Pengeluaran tidak tersedia.</p>`;
-                return;
+            const { groupedData, headers, pengeluaranHeaders, pengeluaranData } = parsedDataGlobal;
+            const groupKeys = Object.keys(groupedData).sort((a,b) => a.localeCompare(b, 'id'));
+            const lowerKeys = groupKeys.map(k => k.toLowerCase());
+            const startIndex = lowerKeys.findIndex(k => k === 'almaira');
+            const endIndex = lowerKeys.findIndex(k => k === 'azka');
+            let filteredKeys = groupKeys;
+            if (startIndex !== -1 && endIndex !== -1 && endIndex >= startIndex) {
+                filteredKeys = groupKeys.slice(startIndex, endIndex + 1);
             }
-            const pengeluaranHeaders = parsedDataGlobal.pengeluaranHeaders;
-            const gradient = gradients[1];
-            const bgStyle = `background: linear-gradient(135deg, ${gradient[0]}, ${gradient[1]});`;
-            let html = `
-                <article class="nota-box p-6 flex flex-col shadow-md expanded" style="${bgStyle}">
-                    <header><h2>Pengeluaran</h2></header>
-                    <div class="flex-grow space-y-3 mt-3">
-            `;
-            const neededHeaders = ['Tanggal', 'Jenis', 'Jumlah', 'Total KAS'];
-            const headerMap = {};
-            neededHeaders.forEach(needed => {
-                const found = pengeluaranHeaders.find(h => h.trim().toLowerCase() === needed.toLowerCase());
-                if (found) headerMap[needed] = found;
-            });
-            pengeluaranItems.forEach(item => {
-                html += `<section class="border border-gray-300 rounded p-3 bg-white text-black">`;
-                neededHeaders.forEach(needed => {
-                    if (!headerMap[needed]) return;
-                    const value = item[headerMap[needed]] || '-';
-                    let displayLabel = needed;
-                    if (needed === 'Jenis') displayLabel = 'Keperluan';
-                    if (needed === 'Jumlah') displayLabel = 'Pengeluaran';
-                    html += `
-                        <div class="flex justify-between text-sm">
-                            <span class="font-medium">${displayLabel}</span>
-                            <span class="text-right break-words">${value}</span>
-                        </div>
-                    `;
-                });
-                html += `</section>`;
-            });
-            if (pengeluaranItems.length > 0) {
-                const lastRow = pengeluaranItems[pengeluaranItems.length - 1];
-                const colDHeader = pengeluaranHeaders[3] || null;
-                const colDValue = colDHeader ? (lastRow[colDHeader] || '-') : '-';
+            // Remove "Pemasukan" and "Pengeluaran" groups from filteredKeys
+            filteredKeys = filteredKeys.filter(name => name.toLowerCase() !== 'pemasukan' && name.toLowerCase() !== 'pengeluaran');
+            let html = '';
+            filteredKeys.forEach((name, index) => {
+                const items = groupedData[name];
+                const gradient = gradients[index % gradients.length];
+                const bgStyle = `background: linear-gradient(135deg, ${gradient[0]}, ${gradient[1]});`;
                 html += `
-                    <div class="mt-4 text-right font-semibold text-black bg-white p-2 rounded border border-gray-300" style="text-align: center;">
-                      Sisa KAS  ${colDValue}
-                    </div>
-                    <a href="?nota" class="nota-button" tabindex="0" role="button">Nota Pengeluaran</a>
+                <article class="nota-box" style="${bgStyle}" data-group-name="${name}">
+                    <header>
+                        </br>
+                        <h2>${name}</h2>
+                    </header>
+                    <div class="content px-6 pb-6">
                 `;
+                items.forEach((item) => {
+                    html += `<section class="border border-gray-300 rounded p-3 bg-white text-black">`;
+                    headers.forEach(header => {
+                        if (header === headers[0]) return;
+                        if (header.toLowerCase() === 'total') {
+                            const totalValue = item[header] || '-';
+                            html += `
+                                <div class="flex justify-between text-sm total-section">
+                                    <span class="font-bold">${header}</span>
+                                    <span class="font-bold">${totalValue}</span>
+                                </div>
+                            `;
+                        } else if (header.toLowerCase() === 'kurang') {
+                            const totalRaw = item['Total'] || item['total'] || '';
+                            const totalNum = parseIndoNumber(totalRaw);
+                            const kurangRaw = item[header] || '';
+                            if (totalNum === 180000) {
+                                html += `
+                                    <div class="flex justify-between text-sm">
+                                        <span class="lunas-green font-medium">${header}</span>
+                                        <span class="lunas-green">LUNAS</span>
+                                    </div>
+                                `;
+                            } else {
+                                html += `
+                                    <div class="flex justify-between text-sm kurang-red">
+                                        <span class="font-medium">${header}</span>
+                                        <span>${kurangRaw || '-'}</span>
+                                    </div>
+                                `;
+                            }
+                        } else {
+                            const value = item[header] || '-';
+                            html += `
+                                <div class="flex justify-between text-sm">
+                                    <span class="font-medium">${header}</span>
+                                    <span class="text-right break-words">${value}</span>
+                                </div>
+                            `;
+                        }
+                    });
+                    html += `</section>`;
+                });
+                html += `
+                    </div>
+                </article>`;
+            });
+            if (html === '') {
+                html = `<p class="text-center text-gray-400">Data Kas tidak tersedia.</p>`;
             }
-            html += `</div></article>`;
-            document.getElementById('data-container').innerHTML = html;
+            const container = document.getElementById('data-container');
+            container.innerHTML = html;
             document.getElementById('loading').classList.add('hidden');
             document.getElementById('error').classList.add('hidden');
         }
@@ -851,87 +923,6 @@
         function renderNota() {
             fetchImages();
         }
-        function renderKas() {
-            if (!parsedDataGlobal) return;
-            const { groupedData, headers, pengeluaranHeaders, pengeluaranData } = parsedDataGlobal;
-            const groupKeys = Object.keys(groupedData).sort((a,b) => a.localeCompare(b, 'id'));
-            const lowerKeys = groupKeys.map(k => k.toLowerCase());
-            const startIndex = lowerKeys.findIndex(k => k === 'almaira');
-            const endIndex = lowerKeys.findIndex(k => k === 'azka');
-            let filteredKeys = groupKeys;
-            if (startIndex !== -1 && endIndex !== -1 && endIndex >= startIndex) {
-                filteredKeys = groupKeys.slice(startIndex, endIndex + 1);
-            }
-            // Remove "Pemasukan" and "Pengeluaran" groups from filteredKeys
-            filteredKeys = filteredKeys.filter(name => name.toLowerCase() !== 'pemasukan' && name.toLowerCase() !== 'pengeluaran');
-            let html = '';
-            filteredKeys.forEach((name, index) => {
-                const items = groupedData[name];
-                const gradient = gradients[index % gradients.length];
-                const bgStyle = `background: linear-gradient(135deg, ${gradient[0]}, ${gradient[1]});`;
-                html += `
-                <article class="nota-box" style="${bgStyle}" data-group-name="${name}">
-                    <header>
-                        <!--span class="header-number">${index + 1}</span--></br>
-                        <h2>${name}</h2>
-                    </header>
-                    <div class="content px-6 pb-6">
-                `;
-                items.forEach((item) => {
-                    html += `<section class="border border-gray-300 rounded p-3 bg-white text-black">`;
-                    headers.forEach(header => {
-                        if (header === headers[0]) return;
-                        if (header.toLowerCase() === 'total') {
-                            const totalValue = item[header] || '-';
-                            html += `
-                                <div class="flex justify-between text-sm total-section">
-                                    <span class="font-bold">${header}</span>
-                                    <span class="font-bold">${totalValue}</span>
-                                </div>
-                            `;
-                        } else if (header.toLowerCase() === 'kurang') {
-                            const totalRaw = item['Total'] || item['total'] || '';
-                            const totalNum = parseIndoNumber(totalRaw);
-                            const kurangRaw = item[header] || '';
-                            if (totalNum === 180000) {
-                                html += `
-                                    <div class="flex justify-between text-sm">
-                                        <span class="lunas-green font-medium">${header}</span>
-                                        <span class="lunas-green">LUNAS</span>
-                                    </div>
-                                `;
-                            } else {
-                                html += `
-                                    <div class="flex justify-between text-sm kurang-red">
-                                        <span class="font-medium">${header}</span>
-                                        <span>${kurangRaw || '-'}</span>
-                                    </div>
-                                `;
-                            }
-                        } else {
-                            const value = item[header] || '-';
-                            html += `
-                                <div class="flex justify-between text-sm">
-                                    <span class="font-medium">${header}</span>
-                                    <span class="text-right break-words">${value}</span>
-                                </div>
-                            `;
-                        }
-                    });
-                    html += `</section>`;
-                });
-                html += `
-                    </div>
-                </article>`;
-            });
-            if (html === '') {
-                html = `<p class="text-center text-gray-400">Data Kas tidak tersedia.</p>`;
-            }
-            const container = document.getElementById('data-container');
-            container.innerHTML = html;
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('error').classList.add('hidden');
-        }
         if (window.innerWidth > 480) {
             document.querySelector('meta[name=viewport]').setAttribute('content', 'width=480, initial-scale=1, maximum-scale=1, user-scalable=no');
         }
@@ -1021,7 +1012,7 @@
                 let html = `
                 <article class="nota-box expanded" style="${bgStyle}" data-group-name="${exactMatchKey}">
                     <header>
-                        <!--span class="header-number">1</span--></br>
+                        </br>
                         <h2>${exactMatchKey}</h2>
                     </header>
                     <div class="content px-6 pb-6">
@@ -1128,7 +1119,7 @@
                 html += `
                 <article class="nota-box collapsed" style="${bgStyle}" data-group-name="${name}">
                     <header>
-                        <!--span class="header-number">${index + 1}</span--></br>
+                        </br>
                         <h2>${name}</h2>
                     </header>
                     <div class="content px-6 pb-6">
