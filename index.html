@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
     <style>
-        html{
+        html {
             max-width: 481px;
             margin: auto;
             display: block;
@@ -20,7 +20,7 @@
             min-height: 100vh;
             color: #e0e7ff;
             max-width: 480px;
-            margin:auto;
+            margin: auto;
             overflow-x: hidden;
             display: flex;
             flex-direction: column;
@@ -315,36 +315,6 @@
         nav.fixed-bottom-nav a i {
             font-size: 1.25rem;
             margin-bottom: 0.125rem;
-        }
-        /* Kas header with number and left aligned text */
-        .nota-box > header {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            gap: 0.75rem;
-            padding-left: 1rem;
-        }
-        .nota-box > header > h2 {
-            font-weight: 900;
-            font-size: 1.25rem;
-            user-select: none;
-            text-align: left;
-            flex-grow: 1;
-            background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8f00ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            -moz-background-clip: text;
-            -moz-text-fill-color: transparent;
-            letter-spacing: 0.05em;
-        }
-        .nota-box > header > .header-number {
-            font-weight: 700;
-            font-size: 1.25rem;
-            color: #34d399;
-            user-select: none;
-            min-width: 1.5rem;
-            text-align: right;
-            flex-shrink: 0;
         }
         /* Nota images grid with 2 columns and overlay title */
         .nota-images-grid {
@@ -1051,11 +1021,11 @@
                 const bgStyle = `background: linear-gradient(135deg, ${gradient[0]}, ${gradient[1]});`;
                 let html = `
                 <article class="nota-box expanded" style="${bgStyle}" data-group-name="${exactMatchKey}">
-                    <header tabindex="0" role="button" aria-expanded="true" aria-controls="content-exact" id="header-exact">
+                    <header>
                         <span class="header-number">1</span>
                         <h2>${exactMatchKey}</h2>
                     </header>
-                    <div id="content-exact" class="content px-6 pb-6" aria-labelledby="header-exact">
+                    <div class="content px-6 pb-6">
                 `;
                 if (exactMatchKey === 'Pengeluaran') {
                     const neededHeaders = ['Tanggal', 'Jenis', 'Jumlah', 'Total KAS'];
@@ -1158,382 +1128,55 @@
                 const bgStyle = `background: linear-gradient(135deg, ${gradient[0]}, ${gradient[1]});`;
                 html += `
                 <article class="nota-box collapsed" style="${bgStyle}" data-group-name="${name}">
-                    <header tabindex="0" role="button" aria-expanded="false" aria-controls="content-all-${index}" id="header-all-${index}">
+                    <header>
                         <span class="header-number">${index + 1}</span>
                         <h2>${name}</h2>
                     </header>
-                    <div id="content-all-${index}" class="content px-6 pb-6 hidden" aria-labelledby="header-all-${index}">
+                    <div class="content px-6 pb-6">
                 `;
-                if (name === 'Pengeluaran') {
-                    const neededHeaders = ['Tanggal', 'Jenis', 'Jumlah', 'Total KAS'];
-                    const headerMap = {};
-                    neededHeaders.forEach(needed => {
-                        const found = pengeluaranHeaders.find(h => h.trim().toLowerCase() === needed.toLowerCase());
-                        if (found) headerMap[needed] = found;
-                    });
-                    items.forEach(item => {
-                        html += `<section class="border border-gray-300 rounded p-3 bg-white text-black">`;
-                        neededHeaders.forEach(needed => {
-                            if (!headerMap[needed]) return;
-                            const value = item[headerMap[needed]] || '-';
-                            let displayLabel = needed;
-                            if (needed === 'Jenis') displayLabel = 'Keperluan';
-                            if (needed === 'Jumlah') displayLabel = 'Pengeluaran';
+                items.forEach((item) => {
+                    html += `<section class="border border-gray-300 rounded p-3 bg-white text-black">`;
+                    headers.forEach(header => {
+                        if (header === headers[0]) return;
+                        if (header.toLowerCase() === 'total') {
+                            const totalValue = item[header] || '-';
                             html += `
-                                <div class="flex justify-between text-sm">
-                                    <span class="font-medium">${displayLabel}</span>
-                                    <span class="text-right break-words">${value}</span>
+                                <div class="flex justify-between text-sm total-section">
+                                    <span class="font-bold">${header}</span>
+                                    <span class="font-bold">${totalValue}</span>
                                 </div>
                             `;
-                        });
-                        html += `</section>`;
-                    });
-                    if (pengeluaranData.length > 0) {
-                        const lastRow = pengeluaranData[pengeluaranData.length - 1];
-                        const colDHeader = pengeluaranHeaders[3] || null;
-                        const colDValue = colDHeader ? (lastRow[colDHeader] || '-') : '-';
-                        html += `
-                            <div class="mt-4 text-right font-semibold text-black bg-white p-2 rounded border border-gray-300" style="text-align: center;">
-                              Sisa KAS  ${colDValue}
-                            </div>
-                            <a href="?nota" class="nota-button" tabindex="0" role="button">Nota Pengeluaran</a>
-                        `;
-                    }
-                } else {
-                    items.forEach((item) => {
-                        html += `<section class="border border-gray-300 rounded p-3 bg-white text-black">`;
-                        headers.forEach(header => {
-                            if (header === headers[0]) return;
-                            if (header.toLowerCase() === 'total') {
-                                const totalValue = item[header] || '-';
-                                html += `
-                                    <div class="flex justify-between text-sm total-section">
-                                        <span class="font-bold">${header}</span>
-                                        <span class="font-bold">${totalValue}</span>
-                                    </div>
-                                `;
-                            } else if (header.toLowerCase() === 'kurang') {
-                                const totalRaw = item['Total'] || item['total'] || '';
-                                const totalNum = parseIndoNumber(totalRaw);
-                                const kurangRaw = item[header] || '';
-                                if (totalNum === 180000) {
-                                    html += `
-                                        <div class="flex justify-between text-sm">
-                                            <span class="font-medium">${header}</span>
-                                            <span class="lunas-green">LUNAS</span>
-                                        </div>
-                                    `;
-                                } else {
-                                    html += `
-                                        <div class="flex justify-between text-sm kurang-red">
-                                            <span class="font-medium">${header}</span>
-                                            <span>${kurangRaw || '-'}</span>
-                                        </div>
-                                    `;
-                                }
-                            } else {
-                                const value = item[header] || '-';
+                        } else if (header.toLowerCase() === 'kurang') {
+                            const totalRaw = item['Total'] || item['total'] || '';
+                            const totalNum = parseIndoNumber(totalRaw);
+                            const kurangRaw = item[header] || '';
+                            if (totalNum === 180000) {
                                 html += `
                                     <div class="flex justify-between text-sm">
+                                        <span class="lunas-green font-medium">${header}</span>
+                                        <span class="lunas-green">LUNAS</span>
+                                    </div>
+                                `;
+                            } else {
+                                html += `
+                                    <div class="flex justify-between text-sm kurang-red">
                                         <span class="font-medium">${header}</span>
-                                        <span class="text-right break-words">${value}</span>
+                                        <span>${kurangRaw || '-'}</span>
                                     </div>
                                 `;
                             }
-                        });
-                        html += `</section>`;
+                        } else {
+                            const value = item[header] || '-';
+                            html += `
+                                <div class="flex justify-between text-sm">
+                                    <span class="font-medium">${header}</span>
+                                    <span class="text-right break-words">${value}</span>
+                                </div>
+                            `;
+                        }
                     });
-                }
-                html += `
-                    </div>
-                </article>`;
-            });
-            const container = document.getElementById('data-container');
-            container.innerHTML = html;
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('error').classList.add('hidden');
-        }
-        if (window.innerWidth > 480) {
-            document.querySelector('meta[name=viewport]').setAttribute('content', 'width=480, initial-scale=1, maximum-scale=1, user-scalable=no');
-        }
-        window.addEventListener('DOMContentLoaded', () => {
-            fetchSheetData();
-            const searchInput = document.getElementById('search-input');
-            searchInput.addEventListener('input', (e) => {
-                const filter = e.target.value.trim();
-                if (!parsedDataGlobal) return;
-                if (filter === '') {
-                    renderByQuery();
-                    return;
-                }
-                displayFilteredAllGroups(filter);
-            });
-            const navLinks = document.querySelectorAll('nav.fixed-bottom-nav a');
-            navLinks.forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const href = link.getAttribute('href');
-                    if (!href) return;
-                    const url = new URL(href, window.location.origin);
-                    history.pushState(null, '', url.search);
-                    renderByQuery();
-                    document.getElementById('search-input').value = '';
+                    html += `</section>`;
                 });
-            });
-            window.addEventListener('popstate', () => {
-                renderByQuery();
-                document.getElementById('search-input').value = '';
-            });
-            const popup1 = document.getElementById('popup-notification');
-            const closeBtn1 = popup1.querySelector('button.close-btn');
-            const popup2 = document.getElementById('popup-notification-2');
-            const closeBtn2 = popup2.querySelector('button.close-btn');
-
-            let autoCloseTimeout1 = null;
-            let autoCloseTimeout2 = null;
-
-            function closePopup1() {
-                if (popup1.style.display !== 'none') {
-                    popup1.style.display = 'none';
-                    if (autoCloseTimeout1) {
-                        clearTimeout(autoCloseTimeout1);
-                        autoCloseTimeout1 = null;
-                    }
-                }
-            }
-            function closePopup2() {
-                if (popup2.style.display !== 'none') {
-                    popup2.style.display = 'none';
-                    if (autoCloseTimeout2) {
-                        clearTimeout(autoCloseTimeout2);
-                        autoCloseTimeout2 = null;
-                    }
-                }
-            }
-
-            closeBtn1.addEventListener('click', () => {
-                closePopup1();
-            });
-            closeBtn2.addEventListener('click', () => {
-                closePopup2();
-            });
-
-            setTimeout(() => {
-                popup1.style.display = 'flex';
-                setTimeout(() => {
-                    popup2.style.display = 'flex';
-                }, 10000);
-                autoCloseTimeout1 = setTimeout(() => {
-                    closePopup1();
-                    closePopup2();
-                }, 60000);
-            }, 10000);
-        });
-        function displayFilteredAllGroups(filter) {
-            if (!parsedDataGlobal) return;
-            const { groupedData, headers, pengeluaranHeaders, pengeluaranData } = parsedDataGlobal;
-            const groupKeys = Object.keys(groupedData).sort((a,b) => a.localeCompare(b, 'id'));
-            const lowerFilter = filter.toLowerCase();
-            const exactMatchKey = groupKeys.find(k => k.toLowerCase() === lowerFilter);
-            if (exactMatchKey) {
-                const items = groupedData[exactMatchKey];
-                const gradient = gradients[0];
-                const bgStyle = `background: linear-gradient(135deg, ${gradient[0]}, ${gradient[1]});`;
-                let html = `
-                <article class="nota-box expanded" style="${bgStyle}" data-group-name="${exactMatchKey}">
-                    <header tabindex="0" role="button" aria-expanded="true" aria-controls="content-exact" id="header-exact">
-                        <span class="header-number">1</span>
-                        <h2>${exactMatchKey}</h2>
-                    </header>
-                    <div id="content-exact" class="content px-6 pb-6" aria-labelledby="header-exact">
-                `;
-                if (exactMatchKey === 'Pengeluaran') {
-                    const neededHeaders = ['Tanggal', 'Jenis', 'Jumlah', 'Total KAS'];
-                    const headerMap = {};
-                    neededHeaders.forEach(needed => {
-                        const found = pengeluaranHeaders.find(h => h.trim().toLowerCase() === needed.toLowerCase());
-                        if (found) headerMap[needed] = found;
-                    });
-                    items.forEach(item => {
-                        html += `<section class="border border-gray-300 rounded p-3 bg-white text-black">`;
-                        neededHeaders.forEach(needed => {
-                            if (!headerMap[needed]) return;
-                            const value = item[headerMap[needed]] || '-';
-                            let displayLabel = needed;
-                            if (needed === 'Jenis') displayLabel = 'Keperluan';
-                            if (needed === 'Jumlah') displayLabel = 'Pengeluaran';
-                            html += `
-                                <div class="flex justify-between text-sm">
-                                    <span class="font-medium">${displayLabel}</span>
-                                    <span class="text-right break-words">${value}</span>
-                                </div>
-                            `;
-                        });
-                        html += `</section>`;
-                    });
-                    if (pengeluaranData.length > 0) {
-                        const lastRow = pengeluaranData[pengeluaranData.length - 1];
-                        const colDHeader = pengeluaranHeaders[3] || null;
-                        const colDValue = colDHeader ? (lastRow[colDHeader] || '-') : '-';
-                        html += `
-                            <div class="mt-4 text-right font-semibold text-black bg-white p-2 rounded border border-gray-300" style="text-align: center;">
-                              Sisa KAS  ${colDValue}
-                            </div>
-                            <a href="?nota" class="nota-button" tabindex="0" role="button">Nota Pengeluaran</a>
-                        `;
-                    }
-                } else {
-                    items.forEach((item) => {
-                        html += `<section class="border border-gray-300 rounded p-3 bg-white text-black">`;
-                        headers.forEach(header => {
-                            if (header === headers[0]) return;
-                            if (header.toLowerCase() === 'total') {
-                                const totalValue = item[header] || '-';
-                                html += `
-                                    <div class="flex justify-between text-sm total-section">
-                                        <span class="font-bold">${header}</span>
-                                        <span class="font-bold">${totalValue}</span>
-                                    </div>
-                                `;
-                            } else if (header.toLowerCase() === 'kurang') {
-                                const totalRaw = item['Total'] || item['total'] || '';
-                                const totalNum = parseIndoNumber(totalRaw);
-                                const kurangRaw = item[header] || '';
-                                if (totalNum === 180000) {
-                                    html += `
-                                        <div class="flex justify-between text-sm">
-                                            <span class="font-medium">${header}</span>
-                                            <span class="lunas-green">LUNAS</span>
-                                        </div>
-                                    `;
-                                } else {
-                                    html += `
-                                        <div class="flex justify-between text-sm kurang-red">
-                                            <span class="font-medium">${header}</span>
-                                            <span>${kurangRaw || '-'}</span>
-                                        </div>
-                                    `;
-                                }
-                            } else {
-                                const value = item[header] || '-';
-                                html += `
-                                    <div class="flex justify-between text-sm">
-                                        <span class="font-medium">${header}</span>
-                                        <span class="text-right break-words">${value}</span>
-                                    </div>
-                                `;
-                            }
-                        });
-                        html += `</section>`;
-                    });
-                }
-                html += `
-                    </div>
-                </article>`;
-                const container = document.getElementById('data-container');
-                container.innerHTML = html;
-                document.getElementById('loading').classList.add('hidden');
-                document.getElementById('error').classList.add('hidden');
-                return;
-            }
-            const filteredKeys = groupKeys.filter(k => k.toLowerCase().includes(lowerFilter));
-            if (filteredKeys.length === 0) {
-                document.getElementById('data-container').innerHTML = `<p class="text-center text-gray-400">Nama "${filter}" tidak ditemukan.</p>`;
-                return;
-            }
-            let html = '';
-            filteredKeys.forEach((name, index) => {
-                const items = groupedData[name];
-                const gradient = gradients[index % gradients.length];
-                const bgStyle = `background: linear-gradient(135deg, ${gradient[0]}, ${gradient[1]});`;
-                html += `
-                <article class="nota-box collapsed" style="${bgStyle}" data-group-name="${name}">
-                    <header tabindex="0" role="button" aria-expanded="false" aria-controls="content-all-${index}" id="header-all-${index}">
-                        <span class="header-number">${index + 1}</span>
-                        <h2>${name}</h2>
-                    </header>
-                    <div id="content-all-${index}" class="content px-6 pb-6 hidden" aria-labelledby="header-all-${index}">
-                `;
-                if (name === 'Pengeluaran') {
-                    const neededHeaders = ['Tanggal', 'Jenis', 'Jumlah', 'Total KAS'];
-                    const headerMap = {};
-                    neededHeaders.forEach(needed => {
-                        const found = pengeluaranHeaders.find(h => h.trim().toLowerCase() === needed.toLowerCase());
-                        if (found) headerMap[needed] = found;
-                    });
-                    items.forEach(item => {
-                        html += `<section class="border border-gray-300 rounded p-3 bg-white text-black">`;
-                        neededHeaders.forEach(needed => {
-                            if (!headerMap[needed]) return;
-                            const value = item[headerMap[needed]] || '-';
-                            let displayLabel = needed;
-                            if (needed === 'Jenis') displayLabel = 'Keperluan';
-                            if (needed === 'Jumlah') displayLabel = 'Pengeluaran';
-                            html += `
-                                <div class="flex justify-between text-sm">
-                                    <span class="font-medium">${displayLabel}</span>
-                                    <span class="text-right break-words">${value}</span>
-                                </div>
-                            `;
-                        });
-                        html += `</section>`;
-                    });
-                    if (pengeluaranData.length > 0) {
-                        const lastRow = pengeluaranData[pengeluaranData.length - 1];
-                        const colDHeader = pengeluaranHeaders[3] || null;
-                        const colDValue = colDHeader ? (lastRow[colDHeader] || '-') : '-';
-                        html += `
-                            <div class="mt-4 text-right font-semibold text-black bg-white p-2 rounded border border-gray-300" style="text-align: center;">
-                              Sisa KAS  ${colDValue}
-                            </div>
-                            <a href="?nota" class="nota-button" tabindex="0" role="button">Nota Pengeluaran</a>
-                        `;
-                    }
-                } else {
-                    items.forEach((item) => {
-                        html += `<section class="border border-gray-300 rounded p-3 bg-white text-black">`;
-                        headers.forEach(header => {
-                            if (header === headers[0]) return;
-                            if (header.toLowerCase() === 'total') {
-                                const totalValue = item[header] || '-';
-                                html += `
-                                    <div class="flex justify-between text-sm total-section">
-                                        <span class="font-bold">${header}</span>
-                                        <span class="font-bold">${totalValue}</span>
-                                    </div>
-                                `;
-                            } else if (header.toLowerCase() === 'kurang') {
-                                const totalRaw = item['Total'] || item['total'] || '';
-                                const totalNum = parseIndoNumber(totalRaw);
-                                const kurangRaw = item[header] || '';
-                                if (totalNum === 180000) {
-                                    html += `
-                                        <div class="flex justify-between text-sm">
-                                            <span class="font-medium">${header}</span>
-                                            <span class="lunas-green">LUNAS</span>
-                                        </div>
-                                    `;
-                                } else {
-                                    html += `
-                                        <div class="flex justify-between text-sm kurang-red">
-                                            <span class="font-medium">${header}</span>
-                                            <span>${kurangRaw || '-'}</span>
-                                        </div>
-                                    `;
-                                }
-                            } else {
-                                const value = item[header] || '-';
-                                html += `
-                                    <div class="flex justify-between text-sm">
-                                        <span class="font-medium">${header}</span>
-                                        <span class="text-right break-words">${value}</span>
-                                    </div>
-                                `;
-                            }
-                        });
-                        html += `</section>`;
-                    });
-                }
                 html += `
                     </div>
                 </article>`;
