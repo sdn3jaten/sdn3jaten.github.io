@@ -423,8 +423,6 @@
             outline: 2px solid #dc2626;
             outline-offset: 2px;
         }
-span.text-right.break-words
-{color:#059569;}
     </style>
 </head>
 <body>
@@ -719,7 +717,7 @@ span.text-right.break-words
                         html += `
                             <div class="flex justify-between text-sm">
                                 <span class="font-medium">${displayLabel}</span>
-                                <span class="text-right break-words">${value}</span>
+                                <span class="text-right break-words" style="color:red;">${value}</span>
                             </div>
                         `;
                     });
