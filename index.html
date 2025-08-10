@@ -70,7 +70,7 @@
             color: #000000;
             border-color: #d1d5db;
             padding: 0.5rem 1rem;
-            border-radius: 0.375rem;
+            border-radius: 0rem;
             margin-bottom: 0.5rem;
         }
         .total-section {
@@ -427,7 +427,7 @@
         .pengeluaran-item {
             background-color: #ffffff;
             color: #000000;
-            border-radius: 0.375rem;
+            border-radius: 0rem;
             padding: 0.5rem 1rem;
             margin-bottom: 0.5rem;
             box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
@@ -769,10 +769,10 @@ section.pengeluaran-item { margin-bottom: 0px; }
                     const colDHeader = pengeluaranHeaders[3] || null;
                     const colDValue = colDHeader ? (lastRow[colDHeader] || '-') : '-';
                     html += `
-                        <div class="mt-4 text-right font-semibold text-black bg-white p-2 rounded border border-gray-300" style="text-align: center;">
-                          Sisa KAS  ${colDValue}
+                        <div class="mt-4 text-right font-semibold text-white bg-teal-800 p-2 rounded border border-teal-800" style="text-align: center;">
+                          <span style=" color: #ffffff; background: #ff0c0c; padding: 0px 5px; margin-right: 5px; ">Saldo KAS </span><span style="color: #ff0c0c;background: #fff;padding: 0px 5px;margin-left: -5px;"> ${colDValue} </span>
                         </div></br>
-                        <a href="?nota" class="nota-button" tabindex="0" role="button">Nota Pengeluaran</a>
+                        <a href="?nota" class="nota-button" tabindex="0" role="button">Cek Nota Pengeluaran</a>
                     `;
                 }
                 html += `</div></article>`;
